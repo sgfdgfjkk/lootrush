@@ -31,7 +31,7 @@ const CASE_ITEMS = ["pal visor tb lav charm bun kitty horns", "visor lav charm b
 const VOL = 1.35;   // higher = more volatile (cheap items more common, top items rarer)
 const POOLS = CASE_ITEMS.map(s => { const its = s.split(" ").map(k => V[k]), w = its.map(v => Math.pow(v, -VOL)), S = w.reduce((a, c) => a + c, 0); return its.map((v, i) => ({ v, ch: w[i] / S * 100 })); });
 const PRICE = POOLS.map(p => Math.round(p.reduce((a, x) => a + x.v * x.ch / 100, 0) / .92));
-const BOTS = ["BaconHairBandit", "NoobSlayer9000", "Sir_Lags_Alot", "OofMaster", "RobuxBeggar", "GrandmaGamer", "CertifiedNoob", "Sweaty_Tryhard", "LagWizard", "DadOfTheYear", "BuilderGuy404", "ChunkyMilk", "BruhMoment", "UnpaidIntern", "TouchGrassPls", "TaxEvader3000", "Guest_1337", "WiFiBandit", "SpicyNugget", "ClumsyKnight", "MomSaidNo", "PizzaRat", "SnackGoblin", "TrashPanda", "HappyFlop"];
+const BOTS = ["Babyalien", "Downyluck", "Elonmusk", "Jamal", "Saint", "Speed",];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const rollIdx = (k) => { let x = Math.random() * 100; const p = POOLS[k]; for (let i = 0; i < p.length; i++) { x -= p[i].ch; if (x <= 0) return i; } return 0; };
 const rollBonus = () => { const w = [55, 28, 13, 4]; let x = Math.random() * 100; for (let i = 0; i < 4; i++) { x -= w[i]; if (x <= 0) return 4 + i; } return 4; };
