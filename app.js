@@ -128,6 +128,22 @@
     { k: "stf", id: 1285307, n: "Sparkle Time Fedora", v: 61200, u: "https://tr.rbxcdn.com/180DAY-021f90eeacf6ea627994dd5ce8365460/150/150/Hat/Png/noFilter", fb: "hat" },
     { k: "valk", id: 1365767, n: "Valkyrie Helm", v: 96500, u: "https://tr.rbxcdn.com/180DAY-33ebc9fedab2e19a669b6686ad7a656b/150/150/Hat/Png/noFilter", fb: "wings" },
     { k: "dominus", id: 21070012, n: "Dominus Empyreus", v: 412000, u: "https://tr.rbxcdn.com/180DAY-6e4a60bf8300b35bae657874937adc28/150/150/Hat/Png/noFilter", fb: "crown" },
+    { k: "cola", id: 24114402, n: "Brighteyes' Bloxy Cola Hat", v: 1200, u: "https://tr.rbxcdn.com/180DAY-5ff406b674b30c37fd0c93639d2cf480/150/150/Hat/Png/noFilter", fb: "hat" },
+    { k: "antl", id: 1272714, n: "Wanwood Antlers", v: 4500, u: "https://tr.rbxcdn.com/180DAY-96fd43629b3fd1d1d9811fc45a8707a0/150/150/Hat/Png/noFilter", fb: "crown" },
+    { k: "cwsh", id: 11748356, n: "Clockwork's Shades", v: 22000, u: "https://tr.rbxcdn.com/180DAY-d239b55c4dd1c98964a60b962db50d05/150/150/FaceAccessory/Png/noFilter", fb: "shades" },
+    { k: "gstf", id: 100929604, n: "Green Sparkle Time Fedora", v: 75000, u: "https://tr.rbxcdn.com/180DAY-e298d61214553785b4492985a6008790/150/150/Hat/Png/noFilter", fb: "hat" },
+    { k: "skn", id: 439945661, n: "Silver King of the Night", v: 85000, u: "https://tr.rbxcdn.com/180DAY-570a262a110ba320a89eaee2784fd60d/150/150/Hat/Png/noFilter", fb: "crown" },
+    { k: "ovw", id: 1587175771, n: "Overseer Wings of Terror", v: 120000, u: "https://tr.rbxcdn.com/180DAY-2d8f2dc2bf356a22de150cba66fcad75/150/150/BackAccessory/Png/noFilter", fb: "wings" },
+    { k: "mstf", id: 119916949, n: "Midnight Blue Sparkle Time Fedora", v: 150000, u: "https://tr.rbxcdn.com/180DAY-8bf37b5cc7e2aaf58e7c1d8659f9e1a1/150/150/Hat/Png/noFilter", fb: "hat" },
+    { k: "phorn", id: 1744060292, n: "Poisoned Horns of the Toxic Wasteland", v: 180000, u: "https://tr.rbxcdn.com/180DAY-b06f512bdce9ecb993282ce2174cc77f/150/150/Hat/Png/noFilter", fb: "crown" },
+    { k: "fhorn", id: 215718515, n: "Fiery Horns of the Netherworld", v: 260000, u: "https://tr.rbxcdn.com/180DAY-65985922892e755b5e5adb474467805e/150/150/Hat/Png/noFilter", fb: "crown" },
+    { k: "ivalk", id: 4390891467, n: "Ice Valkyrie", v: 300000, u: "https://tr.rbxcdn.com/180DAY-334caaa5ba670a38f223d60e1af41aa4/150/150/Hat/Png/noFilter", fb: "wings" },
+    { k: "vvalk", id: 1402432199, n: "Violet Valkyrie", v: 650000, u: "https://tr.rbxcdn.com/180DAY-431eceb5d6471af8a0f68624fc9d3d08/150/150/Hat/Png/noFilter", fb: "wings" },
+    { k: "dmes", id: 64444871, n: "Dominus Messor", v: 900000, u: "https://tr.rbxcdn.com/180DAY-0226212650c34894257a31dedaa7bd88/150/150/Hat/Png/noFilter", fb: "crown" },
+    { k: "dfri", id: 48545806, n: "Dominus Frigidus", v: 1000000, u: "https://tr.rbxcdn.com/180DAY-f70fd4f3d53eaba84bb07c10f781d5ec/150/150/Hat/Png/noFilter", fb: "crown" },
+    { k: "dinf", id: 31101391, n: "Dominus Infernus", v: 1400000, u: "https://tr.rbxcdn.com/180DAY-337bef1e49b65e074fc25542979891ea/150/150/Hat/Png/noFilter", fb: "crown" },
+    { k: "dves", id: 96103379, n: "Dominus Vespertilio", v: 2000000, u: "https://tr.rbxcdn.com/180DAY-9ac47de86749aa563b05e43522ed2731/150/150/Hat/Png/noFilter", fb: "crown" },
+    { k: "drex", id: 250395631, n: "Dominus Rex", v: 3500000, u: "https://tr.rbxcdn.com/180DAY-c0f3e5baf40923cc199ec9158b91a170/150/150/Hat/Png/noFilter", fb: "crown" },
   ];
   window.LR_ITEMS = RBX;
   const itemImg = (it, cls = "") => `<img class="${cls}" src="${it.u}" alt="${it.n}" title="${it.n}" data-fb="img/items/${it.fb}.png" draggable="false" referrerpolicy="no-referrer">`;
@@ -311,9 +327,17 @@
     { n: "Starter", items: "pal visor tb lav charm bun kitty horns", w: 60, it: 5, p: 15, f: "saturate(.15) brightness(1.05)" }, { n: "Blue Rush", items: "visor lav charm bun kitty beau band rstb", w: 50, it: 3, p: 40, f: "none" }, { n: "Frostbite", items: "charm kitty beau band big biv adu fed", w: 40, it: 1, nw: 1, p: 80, f: "hue-rotate(-30deg) saturate(.85) brightness(1.06)" },
     { n: "Toxic", items: "beau band big biv adu horns rstb sshf", w: 25, it: 6, cm: 1, p: 130, f: "hue-rotate(-95deg) saturate(.7)" }, { n: "Royal", items: "big biv adu horns fed clock dom pstf", w: 25, it: 7, p: 210, f: "hue-rotate(55deg) saturate(.8)" }, { n: "Crimson", items: "biv adu horns rstb clock sshf bit stf", w: 20, it: 4, cm: 1, p: 320, f: "hue-rotate(140deg) saturate(.75)" },
     { n: "Gold Rush", items: "adu horns fed clock sshf dom pstf valk", w: 10, it: 2, p: 540, f: "hue-rotate(185deg) saturate(.9) brightness(1.05)" }, { n: "Shadow", items: "horns rstb clock bit dom stf valk dominus", w: 10, it: 1, nw: 1, p: 800, f: "saturate(0) brightness(.75) contrast(1.15)" }, { n: "Dragon", items: "clock sshf bit dom pstf stf valk dominus", w: 5, it: 0, p: 1400, f: "hue-rotate(160deg) saturate(.95) brightness(.95)" },
+    { n: "Penny Pinch", items: "pal visor tb antl clock", odds: "50 30 14.5 5 0.5", w: 5, nw: 1, f: "hue-rotate(20deg) saturate(.6) brightness(1.1)" },
+    { n: "Sparkle Storm", items: "bun kitty fed stf gstf mstf", odds: "55 25 12 5 2 1", w: 10, nw: 1, f: "hue-rotate(250deg) saturate(1.1)" },
+    { n: "Horns of Hell", items: "biv horns rstb ovw phorn fhorn", odds: "50 30 15 3 1.5 0.5", w: 10, nw: 1, f: "hue-rotate(120deg) saturate(1.2) brightness(.9)" },
+    { n: "Valk Vault", items: "adu horns rstb valk ivalk vvalk", odds: "60 25 10 3.5 1 0.5", w: 10, nw: 1, f: "hue-rotate(-60deg) saturate(1.1) brightness(1.1)" },
+    { n: "Inferno", items: "band big biv fhorn dinf", odds: "70 20 7 2.5 0.5", w: 5, nw: 1, f: "hue-rotate(130deg) saturate(1.4)" },
+    { n: "Dominus Dream", items: "big adu horns cwsh dmes dfri dinf dves", odds: "50 30 12 5 2 0.7 0.25 0.05", w: 5, nw: 1, f: "hue-rotate(195deg) saturate(1.2) brightness(1.08)" },
+    { n: "Frost Gamble", items: "kitty beau dfri", odds: "60 35 5", w: 5, nw: 1, f: "hue-rotate(-40deg) saturate(.9) brightness(1.15)" },
+    { n: "Rex Rush", items: "band adu sshf drex", odds: "80 15 4 1", w: 5, nw: 1, f: "hue-rotate(170deg) saturate(1.3) contrast(1.1)" },
   ];
   const VOL = 1.35;   // volatility: must match server.js
-  CASES.forEach(c => { const its = c.items.split(" ").map(key => RBX.find(x => x.k === key)), w = its.map(x => Math.pow(x.v, -VOL)), S = w.reduce((a, x) => a + x, 0);
+  CASES.forEach(c => { const its = c.items.split(" ").map(key => RBX.find(x => x.k === key)), w = c.odds ? c.odds.split(" ").map(Number) : its.map(x => Math.pow(x.v, -VOL)), S = w.reduce((a, x) => a + x, 0);
     c.p = Math.round(its.reduce((a, x, i) => a + x.v * w[i] / S, 0) / .92); c.it = RBX.indexOf(its[its.length - 1]); c.max = its[its.length - 1].v; });
   $("#hl").innerHTML = [hbHTML(), hbHTML(), hbHTML()].join(""); $$("#hl .deal").forEach(el => io.observe(el));
   const MODS = {
@@ -544,16 +568,18 @@
   const poolCache = {};
   // tier from the item's real value: grey < blue < purple < pink < gold < red
   const tierOf = (v) => v < 150 ? 0 : v < 400 ? 1 : v < 3000 ? 2 : v < 20000 ? 3 : v < 100000 ? 4 : 5;
+  const topHalf = (p) => p.slice(Math.floor(p.length / 2));
   function casePool(k) {
     if (poolCache[k]) return poolCache[k];
-    const c = CASES[k], its = c.items.split(" ").map(key => RBX.find(x => x.k === key)), S = its.reduce((a, x) => a + Math.pow(x.v, -VOL), 0);
-    // cheap items are far more likely, the top items are rare (chance ~ 1 / value^VOL)
-    return poolCache[k] = its.map(x => ({ n: x.n, ref: x, v: x.v, t: tierOf(x.v), ch: +(100 * Math.pow(x.v, -VOL) / S).toFixed(3) }));
+    const c = CASES[k], its = c.items.split(" ").map(key => RBX.find(x => x.k === key));
+    // fixed odds for the high-risk cases; otherwise cheap items are far more likely (chance ~ 1 / value^VOL)
+    const w = c.odds ? c.odds.split(" ").map(Number) : its.map(x => Math.pow(x.v, -VOL)), S = w.reduce((a, x) => a + x, 0);
+    return poolCache[k] = its.map((x, i) => ({ n: x.n, ref: x, v: x.v, t: tierOf(x.v), ch: +(100 * w[i] / S).toFixed(3) }));
   }
   const STOCK = { n: "Gold Spin", ref: { src: "img/coin3d.png" }, v: 0, t: 3, ch: 0, stock: 1 };
   const ADM = { bonus: !!window.LR_FORCE_BONUS, win: false };
   const bonusChance = () => ADM.bonus ? 1 : 1 / 25;
-  function rollBonus(k) { const p = casePool(k).slice(4), w = [55, 28, 13, 4]; let x = Math.random() * 100; for (let i = 0; i < p.length; i++) { x -= w[i]; if (x <= 0) return p[i]; } return p[0]; }
+  function rollBonus(k) { const p = topHalf(casePool(k)), w = p.map((_, i) => 100 * Math.pow(.5, i + 1)); let x = Math.random() * 100; for (let i = 0; i < p.length; i++) { x -= w[i]; if (x <= 0) return p[i]; } return p[0]; }
   function rollItem(k) { let x = Math.random() * 100; const p = casePool(k); for (const it of p) { x -= it.ch; if (x <= 0) return it; } return p[0]; }
   const modeOf = (b) => ["jackpot", "terminal", "underdog"].find(m => b.mods.includes(m)) || "classic";
   const MODE_NAME = { classic: "Classic", jackpot: "Jackpot", terminal: "Terminal", underdog: "Underdog" };
@@ -758,7 +784,7 @@
   }
   function bonusSpin(b, r, seats) {
     const base = b.mods.includes("fast") ? 2800 : 4600, list = [];
-    seats.forEach(i => { const R = V.reels[i]; if (!R) return; const top = casePool(b.cs[r]).slice(4);
+    seats.forEach(i => { const R = V.reels[i]; if (!R) return; const top = topHalf(casePool(b.cs[r]));
       R.build(b.cs[r], b.hist[i][r]); for (let k = 0; k < LEN; k++) if (k !== TGT) R.items[k] = pick(top); R.el.classList.remove("gold"); R.el.classList.add("bonus"); R.s = 3 * SLOT; R.plan(base); list.push({ R, it: b.hist[i][r], el: R.el.parentElement }); });
     return new Promise(done => { let t0 = null, last = 0, left = list.length; if (!left) return done();
       (function frame(now) { if (V.b !== b) return done(); if (t0 === null) t0 = now; const t = now - t0;
