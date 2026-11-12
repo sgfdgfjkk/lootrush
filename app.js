@@ -882,6 +882,8 @@
   let vTimer = null;
   function openView(id) {
     closeView(); const b = battles.find(x => x.id === id);
+    if (!b && NET.on && (openView.tries = (openView.tries || 0) + 1) < 15) { setTimeout(() => { if (location.hash === "#battle-" + id) openView(id); }, 200); return; }
+    openView.tries = 0;
     if (!b) { toast(`${ic("clock")} That battle has ended`); location.hash = "battles"; return; }
     if (b.net && b.state === "live") b.round = netRound(b);
     V.b = b; b.watch = true; V.sig = ""; ensureHist(b); V.shown = b.state === "done" ? b.cs.length : b.state === "live" ? b.round : 0;
