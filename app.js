@@ -3,8 +3,9 @@
   const $ = (s) => document.querySelector(s), $$ = (s) => [...document.querySelectorAll(s)];
   const rand = (a, b) => a + Math.random() * (b - a), ri = (a, b) => Math.floor(rand(a, b + 1));
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
-  // money shown in USD: 1,000 coins = $1.00
-  const fmt = (n) => (Math.round(n) / 1000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // money is shown in site coins: 1,000 shown = $2 (inside, 1,000 units = $1, so shown = units / 2)
+  const SHOW = 2;
+  const fmt = (n) => (Math.round(n) / SHOW).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const two = (n) => String(n).padStart(2, "0");
   // online = the page is served by server.js (it serves net-config.js); otherwise everything is local with bots
   const NET = { on: !!window.LR_SERVER, ws: null, rid: 0, wait: {}, q: [],
@@ -263,10 +264,10 @@
     paint(tipM); tipM.querySelector(".tip-n").textContent = name; tipM.querySelector(".tip-n2").textContent = name.toUpperCase();
     const inp = tipM.querySelector("input"), err = tipM.querySelector(".tip-err");
     tipM.querySelector(".tip-x").onclick = () => tipM.hidden = true;
-    tipM.querySelector(".tip-max").onclick = () => { inp.value = (Math.min(LR.bal, left) / 1000).toFixed(2); };
+    tipM.querySelector(".tip-max").onclick = () => { inp.value = (Math.min(LR.bal, left) / SHOW).toFixed(2); };
     tipM.querySelector(".tip-go").onclick = () => {
-      const v = Math.round(parseFloat(inp.value) * 1000);
-      if (!v || v < 10) return err.textContent = "Minimum tip is 0.01";
+      const v = Math.round(parseFloat(inp.value) * SHOW);
+      if (!v || v < 10) return err.textContent = "Minimum tip is 5.00";
       if (v > left) return err.textContent = "That's over your daily tip limit";
       if (v > LR.bal) return err.textContent = "You don't have that much";
       if (NET.on) { const go = tipM.querySelector(".tip-go"); go.disabled = true;
@@ -501,7 +502,7 @@
       <div class="oc-it">${itemImg(it)}</div>
       <div class="oc-body" style="clip-path:${SEAM_B};filter:${c.f}"></div></div>`; };
   function drawPick() {
-    const q = $("#pkQ").value.trim().toLowerCase(), lo = (+$("#pkMin").value || 0) * 1000, hi = $("#pkMax").value ? +$("#pkMax").value * 1000 : Infinity, c = counts();
+    const q = $("#pkQ").value.trim().toLowerCase(), lo = (+$("#pkMin").value || 0) * SHOW, hi = $("#pkMax").value ? +$("#pkMax").value * SHOW : Infinity, c = counts();
     let ks = CASES.map((_, k) => k).filter(k => { const x = CASES[k];
       return (!q || x.n.toLowerCase().includes(q)) && x.p >= lo && x.p <= hi && (pk.risk == null || x.w === pk.risk) && (pk.tab !== "fav" || favs.includes(x.n)) && (pk.tab !== "new" || x.nw) && (pk.comm || !x.cm); });
     const S = { pa: (a, b) => CASES[a].p - CASES[b].p, pd: (a, b) => CASES[b].p - CASES[a].p, rs: (a, b) => CASES[b].w - CASES[a].w, rr: (a, b) => CASES[a].w - CASES[b].w, na: (a, b) => CASES[a].n.localeCompare(CASES[b].n) };
@@ -983,8 +984,8 @@
   const admDraw = () => {
     adm.innerHTML = `<div class="adm-in"><div class="adm-h"><b>${ic("bolt")} Admin panel</b><button class="adm-x" data-a="close">${ic("x")}</button></div>
       <div class="adm-s"><small>Balance</small><div class="adm-r"><span class="adm-v"><span class="coin sm"></span>${fmt(LR.bal)}</span>
-        <input id="admBal" type="number" min="0" step="0.01" placeholder="Set $"><button data-a="set">Set</button></div>
-        <div class="adm-r"><button data-a="add" data-v="10000">+$10</button><button data-a="add" data-v="100000">+$100</button><button data-a="add" data-v="1000000">+$1,000</button><button data-a="zero">Set $0</button></div></div>
+        <input id="admBal" type="number" min="0" step="0.01" placeholder="Set"><button data-a="set">Set</button></div>
+        <div class="adm-r"><button data-a="add" data-v="10000">+5K</button><button data-a="add" data-v="100000">+50K</button><button data-a="add" data-v="1000000">+500K</button><button data-a="zero">Set 0</button></div></div>
       <div class="adm-s"><small>Battles</small>
         <label class="adm-t"><input type="checkbox" data-a="bonus" ${ADM.bonus ? "checked" : ""}><i></i>Every pull is a Gold Spin</label>
         <label class="adm-t"><input type="checkbox" data-a="win" ${ADM.win ? "checked" : ""}><i></i>I always win my battles</label>
@@ -998,7 +999,7 @@
     if (e.target === adm) return adm.hidden = true;
     const b = e.target.closest("[data-a]"); if (!b || b.tagName === "INPUT") return; const a = b.dataset.a;
     if (a === "close") return adm.hidden = true;
-    if (a === "set") { const v = parseFloat($("#admBal").value); if (isNaN(v) || v < 0) return; LR.spend(LR.bal); LR.addCoins(Math.round(v * 1000), b); }
+    if (a === "set") { const v = parseFloat($("#admBal").value); if (isNaN(v) || v < 0) return; LR.spend(LR.bal); LR.addCoins(Math.round(v * SHOW), b); }
     if (a === "add") LR.addCoins(+b.dataset.v, b);
     if (a === "zero") LR.spend(LR.bal);
     if (a === "spawn") { for (let k = 0; k < 3; k++) battles.unshift(mk("waiting")); renderBattles(); }
@@ -1076,7 +1077,7 @@
     const r = await NET.req("admin", { a: "list" }); if (r.err) return toast(`${ic("clock")} ${r.err}`);
     adm.innerHTML = `<div class="adm-in"><div class="adm-h"><b>${ic("bolt")} Admin panel</b><button class="adm-x" data-n="close">${ic("x")}</button></div>
       <div class="adm-s"><small>Give balance</small><div class="adm-r"><input id="admU" placeholder="Player" list="admL" style="width:130px"><datalist id="admL">${r.users.map(x => `<option value="${x.u}">`).join("")}</datalist>
-        <input id="admV" type="number" step="0.01" placeholder="$" style="width:80px"><button data-n="add">Add</button><button data-n="set">Set</button></div>
+        <input id="admV" type="number" step="0.01" placeholder="Amount" style="width:80px"><button data-n="add">Add</button><button data-n="set">Set</button></div>
         <div class="adm-r adm-ul">${r.users.map(x => `<span><b></b> <span class="coin sm"></span>${fmt(x.bal)}</span>`).join("")}</div></div>
       <div class="adm-s"><small>Cheats (only your battles)</small>
         <label class="adm-t"><input type="checkbox" data-n="bonus"><i></i>Every pull is a Gold Spin</label>
@@ -1087,7 +1088,7 @@
   adm.addEventListener("click", async (e) => {
     const b = e.target.closest("[data-n]"); if (!NET.on || !b || b.tagName === "INPUT") return; e.stopImmediatePropagation(); const a = b.dataset.n;
     if (a === "close") return adm.hidden = true;
-    const o = { a }; if (a === "add" || a === "set") { o.user = $("#admU").value.trim() || ME; o.v = Math.round(parseFloat($("#admV").value) * 1000); if (isNaN(o.v)) return toast(`${ic("clock")} Enter an amount`); }
+    const o = { a }; if (a === "add" || a === "set") { o.user = $("#admU").value.trim() || ME; o.v = Math.round(parseFloat($("#admV").value) * SHOW); if (isNaN(o.v)) return toast(`${ic("clock")} Enter an amount`); }
     const r = await NET.req("admin", o); toast(r.err ? `${ic("clock")} ${r.err}` : `${ic("check")} Done`); if (!r.err && (a === "add" || a === "set")) LR_ADMIN();
   }, true);
   adm.addEventListener("change", (e) => { const a = e.target.dataset.n; if (NET.on && (a === "bonus" || a === "win")) NET.req("admin", { a, on: e.target.checked }).then(r => toast(r.err ? r.err : `${ic("check")} ${a === "bonus" ? "Gold Spin" : "Always win"} ${e.target.checked ? "on" : "off"}`)); }, true);
