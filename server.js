@@ -26,15 +26,19 @@ const hashPw = (pw, salt) => crypto.scryptSync(pw, salt, 32).toString("hex");
 const today = () => new Date().toISOString().slice(0, 10);
 
 // ---------------------------------------------------------------- game data (must match app.js)
-const V = { pal: 40, visor: 60, tb: 80, lav: 90, charm: 120, bun: 150, kitty: 190, beau: 210, band: 300, big: 400, biv: 650, adu: 900, horns: 2600, rstb: 9500, fed: 9800, clock: 18400, sshf: 27300, bit: 31000, dom: 33900, pstf: 44100, stf: 61200, valk: 96500, dominus: 412000 };
-const CASE_ITEMS = ["pal visor tb lav charm bun kitty horns", "visor lav charm bun kitty beau band rstb", "charm kitty beau band big biv adu fed", "beau band big biv adu horns rstb sshf", "big biv adu horns fed clock dom pstf", "biv adu horns rstb clock sshf bit stf", "adu horns fed clock sshf dom pstf valk", "horns rstb clock bit dom stf valk dominus", "clock sshf bit dom pstf stf valk dominus"];
+const V = { cola: 1200, antl: 4500, cwsh: 22000, gstf: 75000, skn: 85000, ovw: 120000, mstf: 150000, phorn: 180000, fhorn: 260000, ivalk: 300000, vvalk: 650000, dmes: 900000, dfri: 1000000, dinf: 1400000, dves: 2000000, drex: 3500000, pal: 40, visor: 60, tb: 80, lav: 90, charm: 120, bun: 150, kitty: 190, beau: 210, band: 300, big: 400, biv: 650, adu: 900, horns: 2600, rstb: 9500, fed: 9800, clock: 18400, sshf: 27300, bit: 31000, dom: 33900, pstf: 44100, stf: 61200, valk: 96500, dominus: 412000 };
+const CASE_ITEMS = ["pal visor tb lav charm bun kitty horns", "visor lav charm bun kitty beau band rstb", "charm kitty beau band big biv adu fed", "beau band big biv adu horns rstb sshf", "big biv adu horns fed clock dom pstf", "biv adu horns rstb clock sshf bit stf", "adu horns fed clock sshf dom pstf valk", "horns rstb clock bit dom stf valk dominus", "clock sshf bit dom pstf stf valk dominus",
+  "pal visor tb antl clock", "bun kitty fed stf gstf mstf", "biv horns rstb ovw phorn fhorn", "adu horns rstb valk ivalk vvalk", "band big biv fhorn dinf", "big adu horns cwsh dmes dfri dinf dves", "kitty beau dfri", "band adu sshf drex"];
+// fixed odds (%) for the high-risk cases, by case index
+const ODDS = { 9: "50 30 14.5 5 0.5", 10: "55 25 12 5 2 1", 11: "50 30 15 3 1.5 0.5", 12: "60 25 10 3.5 1 0.5", 13: "70 20 7 2.5 0.5", 14: "50 30 12 5 2 0.7 0.25 0.05", 15: "60 35 5", 16: "80 15 4 1" };
 const VOL = 1.35;   // higher = more volatile (cheap items more common, top items rarer)
-const POOLS = CASE_ITEMS.map(s => { const its = s.split(" ").map(k => V[k]), w = its.map(v => Math.pow(v, -VOL)), S = w.reduce((a, c) => a + c, 0); return its.map((v, i) => ({ v, ch: w[i] / S * 100 })); });
-const PRICE = POOLS.map(p => Math.round(p.reduce((a, x) => a + x.v * x.ch / 100, 0) / .92));
+const POOLS = CASE_ITEMS.map((s, ci) => { const its = s.split(" ").map(k => V[k]), w = ODDS[ci] ? ODDS[ci].split(" ").map(Number) : its.map(v => Math.pow(v, -VOL)), S = w.reduce((a, c) => a + c, 0); return its.map((v, i) => ({ v, ch: w[i] / S * 100, w: w[i], S })); });
+const PRICE = POOLS.map(p => Math.round(p.reduce((a, x) => a + x.v * x.w / x.S, 0) / .92));   // same maths as app.js
 const BOTS = ["BaconHairBandit", "NoobSlayer9000", "Sir_Lags_Alot", "OofMaster", "RobuxBeggar", "GrandmaGamer", "CertifiedNoob", "Sweaty_Tryhard", "LagWizard", "DadOfTheYear", "BuilderGuy404", "ChunkyMilk", "BruhMoment", "UnpaidIntern", "TouchGrassPls", "TaxEvader3000", "Guest_1337", "WiFiBandit", "SpicyNugget", "ClumsyKnight", "MomSaidNo", "PizzaRat", "SnackGoblin", "TrashPanda", "HappyFlop"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const rollIdx = (k) => { let x = Math.random() * 100; const p = POOLS[k]; for (let i = 0; i < p.length; i++) { x -= p[i].ch; if (x <= 0) return i; } return 0; };
-const rollBonus = () => { const w = [55, 28, 13, 4]; let x = Math.random() * 100; for (let i = 0; i < 4; i++) { x -= w[i]; if (x <= 0) return 4 + i; } return 4; };
+const rollBonus = (k) => { const n = POOLS[k].length, h = Math.floor(n / 2), w = []; for (let i = h; i < n; i++) w.push(Math.pow(.5, i - h + 1)); const S = w.reduce((a, c) => a + c, 0);
+  let x = Math.random() * S; for (let i = 0; i < w.length; i++) { x -= w[i]; if (x <= 0) return h + i; } return h; };
 const grp = (t) => t.split("v").map(Number), seats = (t) => grp(t).reduce((a, b) => a + b, 0);
 const teamOf = (t, i) => { let s = 0; const g = grp(t); for (let k = 0; k < g.length; k++) { if (i < s + g[k]) return k; s += g[k]; } return 0; };
 const FORMATS = ["1v1", "1v1v1", "1v1v1v1", "2v2", "3v3", "2v2v2"];
@@ -76,7 +80,7 @@ function decide(b) {
 function startBattle(b) {
   b.state = "live"; b.startAt = Date.now(); b.hist = b.players.map(() => []); b.bon = {};
   const gold = b.players.some(p => { const u = userOf(p); return u && u.cheatBonus && ADMINS.includes(p.toLowerCase()); });
-  b.players.forEach((p, i) => b.cs.forEach((k, r) => { const bonus = Math.random() < (gold ? 1 : 1 / 25); b.hist[i][r] = bonus ? rollBonus() : rollIdx(k); if (bonus) b.bon[i + "_" + r] = 1; }));
+  b.players.forEach((p, i) => b.cs.forEach((k, r) => { const bonus = Math.random() < (gold ? 1 : 1 / 25); b.hist[i][r] = bonus ? rollBonus(k) : rollIdx(k); if (bonus) b.bon[i + "_" + r] = 1; }));
   b.winner = decide(b); upd(b);
   b.timer = setTimeout(() => finishBattle(b), duration(b));
 }
