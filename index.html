@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LootRush · Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Rubik:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- DEMO ONLY: play-money coins, no deposits, no withdrawals, no real prizes. -->
+
+<!-- ================= HEADER ================= -->
+<header class="top">
+  <a class="logo" href="#" data-go=""><span class="logo-mark"><img src="img/logo.png" alt="" draggable="false"></span><span class="logo-txt">LOOT<b>RUSH</b></span></a>
+
+  <nav class="nav">
+    <div class="dd">
+      <button class="hb-pill" id="gamesBtn"><i data-i="sparkle"></i>GAMES<i data-i="down" class="car"></i></button>
+      <div class="dd-menu" id="gamesMenu"></div>
+    </div>
+    <a class="hb-pill" href="#" data-soon="Rewards"><i data-i="gift"></i>REWARDS<b class="hb-badge">1</b></a>
+  </nav>
+
+  <div class="right">
+    <div class="hb-wallet">
+      <div class="bal"><span class="coin"></span><b id="bal">0</b></div>
+    </div>
+    <button class="hb-ic" id="mute" title="Sound"><i data-i="vol"></i></button>
+    <button class="hb-ic" id="bell" title="Notifications"><i data-i="bell"></i><b class="dot"></b></button>
+    <button class="hb-me" title="Account"><i data-i="user"></i><b class="hb-lv">13</b></button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- detailed background scene (drawn in code, no images) -->
+  <div class="scene" id="scene" aria-hidden="true"></div>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main" id="main">
+    <div class="page">
+     <div id="view-home">
+
+      <!-- hero -->
+      <section class="hero">
+        <div class="card welcome">
+          <div class="wc-l">
+            <h4>Welcome back!</h4>
+            <div class="wc-user">
+              <span class="wc-av art-slot" data-slot="avatar"><i data-i="user"></i><b class="lvl-chip sm">13</b></span>
+              <div><b class="wc-name">Player_8869</b><small id="joined">Joined today</small></div>
+            </div>
+            <div class="wc-lv"><span>Level progress</span><b class="num"><span id="xpNow">2,940</span> / 5,000 XP</b></div>
+            <div class="bar"><i id="xpbar"></i></div>
+            <button class="btn blue" data-soon="Rewards">View Rewards</button>
+          </div>
+          <div class="wc-art wc-bunny"><video class="wb-vid" poster="img/welcome_bunny.png" autoplay muted loop playsinline><source src="img/welcome_bunny.webm" type="video/webm"></video></div>
+        </div>
+
+        <div class="card promo" id="promo">
+          <div class="slides">
+            <div class="slide on">
+              <h2>WEEKLY<br><em>RACE &amp; RAFFLE</em></h2>
+              <p>Play any game to climb the board. Top 10 split 100.00 in play money.</p>
+              <div class="cd" id="cd"></div>
+            </div>
+            <div class="slide">
+              <h2><em>3 FREE CASES</em><br>EVERY DAY</h2>
+              <p>It's a demo, so everything is free. Open your starter cases now.</p>
+              <button class="btn blue big" data-soon="Free cases">Open now</button>
+            </div>
+            <div class="slide">
+              <h2><em>CASE BATTLES</em><br>ARE LIVE</h2>
+              <p>Open the same cases as your friends. Highest total takes the pot.</p>
+              <button class="btn blue big" data-go="battles">View battles</button>
+            </div>
+          </div>
+          <div class="promo-bg"><img src="img/race_banner.jpg" alt="" draggable="false"></div>
+          <div class="dots" id="dots"></div>
+        </div>
+      </section>
+
+      <!-- house games -->
+      <section class="sec">
+        <div class="sec-h"><h3><i data-i="home"></i>House Games</h3></div>
+        <div class="games" id="games"></div>
+      </section>
+
+      <!-- battle highlights -->
+      <section class="sec">
+        <div class="sec-h"><h3><i data-i="swords"></i>Battle Highlights</h3><a href="#battles" class="sec-link" data-go="battles">View all battles<i data-i="right"></i></a></div>
+        <div class="hl" id="hl"></div>
+      </section>
+
+      <!-- live bets -->
+      <section class="sec">
+        <div class="sec-h"><h3><i data-i="bolt"></i>Live Bets</h3>
+          <div class="tabs" id="betTabs"><button class="on" data-t="all">All bets</button><button data-t="high">High rollers</button><button data-t="lucky">Lucky wins</button></div>
+        </div>
+        <div class="bets">
+          <div class="b-row head"><span>Game</span><span>Player</span><span>Time</span><span>Bet</span><span>Multiplier</span><span>Payout</span></div>
+          <div id="bets"></div>
+        </div>
+      </section>
+
+     </div>
+
+     <!-- ================= CASE BATTLES ================= -->
+     <div id="view-battles" hidden>
+      <div class="bt-bar">
+        <div class="seg" id="btFilter"><button class="on" data-f="all">All <span id="cAll">0</span></button><button data-f="open">Open <span id="cOpen">0</span></button><button data-f="live">In progress <span id="cLive">0</span></button></div>
+        <div class="bt-act">
+          <button class="lnk" data-soon="Cases"><i data-i="box"></i>Open cases</button>
+          <button class="btn blue" id="btCreate"><i data-i="plus"></i>Create battle</button>
+        </div>
+      </div>
+      <div class="bt-list" id="btList"></div>
+     </div>
+
+     <!-- ================= BATTLE VIEWER ================= -->
+     <div id="view-battle" hidden>
+      <div class="bv-top">
+        <div class="bv-l"><button class="ic-btn back" data-go="battles" title="Back to battles"><i data-i="left"></i></button>
+          <div><div class="bv-val">Total battle value <b><span class="coin sm"></span><span id="bvVal">0</span></b></div><small id="bvSub"></small></div></div>
+        <div class="bv-hex" id="bvHex"></div>
+        <div class="bv-r"><button class="btn blue lip" id="bvCall" hidden><i data-i="plus"></i>Call bots</button><button class="ic-btn" id="bvLink" title="Copy link"><i data-i="copy"></i></button><button class="ic-btn" id="bvFair" title="Fairness"><i data-i="shield"></i></button></div>
+      </div>
+      <div class="bv-arena" id="bvArena"></div>
+      <div class="bv-res" id="bvRes" hidden></div>
+      <div class="bv-teams" id="bvTeams"></div>
+      <div class="bv-hist" id="bvHist"></div>
+     </div>
+
+     <!-- ================= CREATE BATTLE ================= -->
+     <div id="view-create" hidden>
+      <div class="cr">
+        <div class="cr-main">
+          <div class="cr-title"><button class="ic-btn back" data-go="battles" title="Back"><i data-i="left"></i></button><h1>CREATE BATTLE</h1></div>
+          <div class="cr-tools">
+            <button class="tl" id="crDn" title="Most expensive first"><i data-i="sortdn"></i></button>
+            <button class="tl" id="crUp" title="Cheapest first"><i data-i="sortup"></i></button>
+            <button class="tl" id="crMix" title="Shuffle"><i data-i="shuffle"></i></button>
+            <span class="tl-sep"></span>
+            <button class="tl txt" id="crClear"><i data-i="broom"></i>CLEAR CASES</button>
+            <span class="cr-count" id="crCount"></span>
+          </div>
+          <div class="cr-stage" id="crStage"></div>
+        </div>
+
+        <aside class="cr-side">
+          <div class="cr-borrow">
+            <label class="cr-row chk bw-top"><input type="checkbox" id="crFund"><i></i><b>BORROW MODE</b><em id="crBorrowOff"></em></label>
+            <div class="bw-row" id="crBorrowRow" hidden><span id="crBorrowPct">50%</span><input type="range" id="crBorrow" min="10" max="90" step="5" value="50"></div>
+            <small class="bw-note">Pay less to join. You win the same % less.</small>
+          </div>
+          <button class="btn blue big full lip" id="crGo">CREATE BATTLE <span class="coin sm"></span><span id="crCost">0</span></button>
+          <button class="btn ghost big full lip" id="crBots">BATTLE VS BOTS <span class="coin sm"></span><span id="crCost2">0</span></button>
+
+          <div class="cr-box">
+            <h4>GENERAL SETTINGS</h4>
+            <label>Format</label>
+            <div class="tri" id="crFormat"><button class="on" data-v="teams">Teams</button><button data-v="solo">Solo</button><button data-v="shared">Shared</button></div>
+            <label>Players</label>
+            <div class="tri" id="crPlayers"></div>
+            <label>Seat choice</label>
+            <div class="seats" id="crSeats"></div>
+          </div>
+
+          <div class="cr-box">
+            <h4>MODES <em class="cr-mn" id="crModeName">Classic</em></h4>
+            <div class="modes" id="crModes"></div>
+          </div>
+
+          <div class="cr-box">
+            <h4>OPTIONS</h4>
+            <label class="cr-row tog"><span><b>Private battle</b><small>Only people with the link can join</small></span><input type="checkbox" id="crPriv"><i></i></label>
+            <label class="cr-row tog"><span><b>Fast rounds</b><small>Cases open twice as fast</small></span><input type="checkbox" id="crFast"><i></i></label>
+          </div>
+        </aside>
+      </div>
+     </div>
+
+     <!-- case picker -->
+     <div class="modal" id="pick" hidden>
+      <div class="pk-box">
+        <button class="ic-btn sm pk-close" id="pkX"><i data-i="x"></i></button>
+        <div class="pf">
+          <label class="pf-f grow"><span>Search</span><span class="inp"><i data-i="search"></i><input id="pkQ" placeholder="Enter case name"></span></label>
+          <label class="pf-f"><span>Min. price</span><span class="inp"><span class="coin sm"></span><input id="pkMin" type="number" min="0" placeholder="0"></span></label>
+          <label class="pf-f"><span>Max. price</span><span class="inp"><span class="coin sm"></span><input id="pkMax" type="number" min="0" placeholder="∞"></span></label>
+          <label class="pf-f"><span>Sort by</span><span class="inp sel"><i data-i="sortup"></i><select id="pkSort"><option value="pa">Price</option><option value="pd">Price (high)</option><option value="rs">Safest</option><option value="rr">Riskiest</option><option value="na">Name</option></select></span></label>
+          <div class="pf-f"><span>Case risk</span><div class="risk-chips" id="pkRisk"></div></div>
+        </div>
+        <div class="pt">
+          <div class="tabs" id="pkTabs"><button class="on" data-t="all">All</button><button data-t="fav">Favorites</button><button data-t="new">New</button></div>
+          <label class="cr-row tog mini"><i data-i="users" class="ti"></i><b>Community</b><input type="checkbox" id="pkComm" checked><i></i></label>
+        </div>
+        <div class="pk-grid" id="pkGrid"></div>
+        <div class="pk-f"><span>Total value <b><span class="coin sm"></span><span id="pkTot">0</span></b></span><span>Balance after <b><span class="coin sm"></span><span id="pkAfter">0</span></b></span><span class="mut"><b id="pkN">0</b> / 25 cases</span><button class="btn blue lip" id="pkDone">Done</button></div>
+      </div>
+     </div>
+
+      <footer class="foot">
+        <div class="f-brand">
+          <a class="logo sm" href="#"><span class="logo-mark"><i data-i="hexlogo"></i></span><span class="logo-txt">LOOT<b>RUSH</b></span></a>
+          <p>A demo project. Coins are play money with no real value. No deposits, no withdrawals, no real prizes. Not affiliated with Roblox Corporation.</p>
+          <div class="socials"><button class="ic-btn" data-soon="Community"><i data-i="chat"></i></button><button class="ic-btn" data-soon="Videos"><i data-i="play"></i></button><button class="ic-btn" data-soon="Newsletter"><i data-i="mail"></i></button></div>
+        </div>
+        <div class="f-col"><h5>Games</h5><a href="#battles" data-go="battles">Battles</a><a href="#" data-soon="Cases">Cases</a><a href="#" data-soon="Upgrader">Upgrader</a><a href="#" data-soon="Mines">Mines</a></div>
+        <div class="f-col"><h5>Info</h5><a href="#" data-soon="Leaderboard">Leaderboard</a><a href="#" data-soon="Fairness">Fairness</a><a href="#" data-soon="FAQ">FAQ</a></div>
+        <div class="f-col"><h5>Legal</h5><a href="#" data-soon="Terms">Terms</a><a href="#" data-soon="Privacy">Privacy</a><a href="#" data-soon="Play safe">Play safe</a></div>
+      </footer>
+    </div>
+  </main>
+
+  <!-- ================= CHAT ================= -->
+  <aside class="chat" id="chat">
+    <div class="ch-top">
+      <div class="online"><i data-i="hexlogo"></i><b>Online</b><span class="on-dot"></span><b class="num" id="online">164</b></div>
+      <button class="ic-btn sm" id="chatHide" title="Hide chat"><i data-i="x"></i></button>
+    </div>
+    <div class="rain">
+      <div class="rain-fall" aria-hidden="true"><span class="coin" style="--x:6%;--d:0s;--s:0.8;--t:3.4s"></span><span class="coin" style="--x:18%;--d:1.6s;--s:1;--t:4.1s"></span><span class="coin" style="--x:31%;--d:0.7s;--s:0.7;--t:3.1s"></span><span class="coin" style="--x:44%;--d:2.4s;--s:0.9;--t:3.8s"></span><span class="coin" style="--x:57%;--d:1.1s;--s:0.75;--t:3.3s"></span><span class="coin" style="--x:69%;--d:3s;--s:1.05;--t:4.4s"></span><span class="coin" style="--x:81%;--d:0.3s;--s:0.8;--t:3.6s"></span><span class="coin" style="--x:92%;--d:1.9s;--s:0.7;--t:3.0s"></span><span class="coin" style="--x:12%;--d:3.4s;--s:0.65;--t:3.7s"></span><span class="coin" style="--x:63%;--d:2.0s;--s:0.6;--t:3.2s"></span></div>
+      <div class="rain-row">
+        <span class="rain-coin"><span class="coin"></span></span>
+        <div class="rain-t"><small>COIN <i data-i="clock"></i><span class="num" id="rainT">--:--</span></small><b>RAIN</b></div>
+        <span class="rain-amt"><span class="coin sm"></span><b class="num" id="rainAmt">0</b></span>
+      </div>
+      <button class="btn blue full" id="rainJoin">Join Rain</button>
+    </div>
+    <div class="pin"><i data-i="pin"></i>Be nice in chat. Spamming links = mute. Play money only.</div>
+    <div class="msgs" id="msgs"></div>
+    <div class="say"><input id="say" placeholder="Type message here..." maxlength="120"><button class="emo" id="emo" title="Emoji"><i data-i="smile"></i></button><button class="send" id="send" title="Send"><i data-i="send"></i></button></div>
+    <div class="ch-foot"><button class="ic-btn sm" data-soon="Community"><i data-i="chat"></i></button><button class="ic-btn sm" data-soon="Videos"><i data-i="play"></i></button><a href="#" data-soon="Chat rules">Chat rules</a></div>
+  </aside>
+  <button class="chat-open" id="chatShow" title="Show chat"><i data-i="chat"></i></button>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="net-config.js"></script>
+<script src="auth.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

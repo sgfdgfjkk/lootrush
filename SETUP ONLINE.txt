@@ -1,0 +1,27 @@
+LOOTRUSH ONLINE (play with friends)
+===================================
+The site + a small server run together. Friends open ONE link and share chat, battles, balances, tips and rain.
+
+A) PUT IT ONLINE (free, ~10 minutes, once)
+1. Make a free account on github.com. Click "+" (top right) > New repository > name it lootrush > Create.
+2. On the new repo page click "uploading an existing file". Open your lootrush folder and drag in:
+     index.html  app.js  auth.js  styles.css  server.js  package.json  .gitignore  start-server.bat  and the img folder
+   (NOT: _render, old, model and dom, node_modules, data, img\bots, the big .mp4 in the main folder)
+   Click "Commit changes".
+3. Make a free account on render.com (sign in with GitHub). Click New > Web Service > pick the lootrush repo.
+     Build command:  npm install
+     Start command:  npm start
+     Instance type:  Free
+   Under "Environment variables" add:  ADMIN_USERS = your LootRush username   (makes the admin command work for you)
+   Click Create. After 2-3 minutes you get a link like https://lootrush-xxxx.onrender.com  -> send it to your friends.
+4. Everyone registers on the site. New accounts start with $10. Give more with the admin command (/zq7vk3mx9p) > Give balance.
+
+To update later: upload the changed files to the GitHub repo again, Render redeploys by itself.
+
+Good to know (free plan):
+- It falls asleep after ~15 min with nobody on it; the first visit then takes ~30-50s to wake up.
+- Accounts and balances are saved in a file on the server, which the free plan wipes when it restarts or redeploys.
+  Fine for testing. For keeping accounts, add a Render "Disk" (paid) and set DATA_DIR to its path.
+
+B) OR RUN IT ON YOUR PC (for testing alone / same Wi-Fi)
+Install Node.js (nodejs.org, LTS), then double-click start-server.bat and open http://localhost:3000

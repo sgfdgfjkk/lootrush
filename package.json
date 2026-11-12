@@ -1,0 +1,10 @@
+{
+  "name": "lootrush",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LootRush play-money case battles with friends",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "ws": "^8.18.0" }
+}

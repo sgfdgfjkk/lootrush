@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LootRush · Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<canvas id="fx"></canvas><div class="cursor-glow" id="cglow"></div>
+<!-- DEMO ONLY: play-money coins, no deposits, no withdrawals, no real prizes. -->
+<header class="top">
+  <a class="logo" href="#"><span class="mark">LR</span><span>LOOT<b>RUSH</b></span></a>
+  <nav class="nav">
+    <a class="pill blue" href="#"><i data-i="games"></i>GAMES</a>
+    <a class="pill" href="#"><i data-i="gift"></i>REWARDS<span class="badge">1</span></a>
+    <a class="race" href="#"><span class="coin sm"></span>100K RACE</a>
+  </nav>
+  <div class="right">
+    <div class="bal"><span class="coin"></span><b id="bal">0</b></div>
+    <button class="sq blue" id="claim" title="Free play coins"><i data-i="plus"></i></button>
+    <button class="sq" id="mute" title="Sound on/off"><i data-i="vol"></i></button>
+    <button class="sq" id="bell"><i data-i="bell"></i></button>
+    <button class="sq" title="Profile"><i data-i="user"></i></button>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside class="chat">
+    <div class="chat-top"><span class="on-dot"></span><b id="online">175</b>&nbsp;ONLINE</div>
+    <div class="msgs" id="msgs"></div>
+    <div class="say"><input id="say" placeholder="Type message..." maxlength="120"><button id="send"><i data-i="send"></i></button></div>
+  </aside>
+
+  <main class="main">
+    <div class="inner">
+     <div id="view-lobby">
+      <section class="hero">
+        <div class="card hello spot">
+          <div class="hex"><i data-i="user"></i></div>
+          <div class="hello-txt">
+            <h1>Hello, <span>Player_8869</span></h1>
+            <div class="rank"><span>Wood</span><div class="bar"><i id="xpbar"></i></div><span>Bronze</span></div>
+            <small>XP 123 / 250</small>
+          </div>
+          <div class="hello-art"><span class="big-mark">LR</span><i class="tw t1"></i><i class="tw t2"></i><i class="orbitdot" id="odot"></i></div>
+        </div>
+        <div class="card promo spot" id="promo">
+          <div class="slide on">
+            <h2><span>CLAIM 3 FREE</span> CASES</h2>
+            <p>It's a demo, so everything is free. Open three starter cases and see what you pull.</p>
+            <button class="btn blue">OPEN NOW</button>
+          </div>
+          <div class="slide">
+            <h2><span>WEEKLY</span> RACE</h2>
+            <p>Play any game to climb the leaderboard. Top 10 split 100,000 play coins.</p>
+            <button class="btn blue">VIEW RACE</button>
+          </div>
+          <div class="slide">
+            <h2><span>CASE</span> BATTLES</h2>
+            <p>Open the same cases as your friends. Highest total takes the pot.</p>
+            <button class="btn blue">CREATE BATTLE</button>
+          </div>
+          <div class="promo-art"><div class="rays"></div><div class="crate"><i></i><span class="burst"></span></div></div>
+          <div class="dots" id="dots"></div>
+        </div>
+      </section>
+
+      <section class="bar-row">
+        <div class="tabs" id="tabs">
+          <button class="on"><i data-i="home"></i>Lobby</button>
+          <button><i data-i="users"></i>Multiplayer</button>
+          <button><i data-i="games"></i>Solo</button>
+        </div>
+        <label class="search"><i data-i="search"></i><input id="q" placeholder="Search"></label>
+      </section>
+
+      <section class="row" data-group="multi">
+        <div class="row-h"><h3><i data-i="users"></i>MULTIPLAYER GAMES</h3><div class="row-ctl"><a class="va" href="#">VIEW ALL</a><button class="arr"><i data-i="left"></i></button><button class="arr"><i data-i="right"></i></button></div></div>
+        <div class="tiles" id="multi"></div>
+      </section>
+
+      <section class="row" data-group="solo">
+        <div class="row-h"><h3><i data-i="games"></i>SOLO GAMES</h3><div class="row-ctl"><a class="va" href="#">VIEW ALL</a><button class="arr"><i data-i="left"></i></button><button class="arr"><i data-i="right"></i></button></div></div>
+        <div class="tiles" id="solo"></div>
+      </section>
+     </div>
+
+     <div id="view-battles" hidden>
+      <div class="cb-head">
+        <div class="cb-title"><button class="sq back" id="cbBack" title="Back to lobby"><i data-i="left"></i></button><h1>CASE BATTLES</h1><span class="cb-count"><span class="on-dot"></span><b id="cbLive">0</b> live</span></div>
+        <div class="cb-ctl">
+          <div class="cb-sort" id="cbSort"><button class="on" data-s="all">All</button><button data-s="open">Joinable</button><button data-s="live">Live</button></div>
+          <button class="btn blue" id="cbCreate"><i data-i="plus"></i>CREATE BATTLE</button>
+          <button class="sq" id="cbFilter" title="Sort by price"><i data-i="filter"></i></button>
+        </div>
+      </div>
+      <div class="cb-list" id="cbList"></div>
+     </div>
+
+     <div id="view-battle" hidden>
+      <div class="bv-head">
+        <div class="bv-l"><button class="sq back" id="bvBack" title="Back to battles"><i data-i="left"></i></button>
+          <div><div class="bv-val">Total battle value <b><span class="coin sm"></span><span id="bvVal">0</span></b></div><small id="bvSub">Classic mode</small></div></div>
+        <div class="bv-r"><button class="sq" id="bvLink" title="Copy link"><i data-i="copy"></i></button><button class="sq" id="bvFair" title="Fairness"><i data-i="shield"></i></button></div>
+      </div>
+      <div class="bv-round" id="bvRound"></div>
+      <div class="bv-arena" id="bvArena"></div>
+      <div class="bv-teams" id="bvTeams"></div>
+     </div>
+
+     <div id="view-create" hidden>
+      <div class="cr">
+        <div class="cr-main">
+          <div class="cb-title"><button class="sq back" id="crBack" title="Back to battles"><i data-i="left"></i></button><h1>CREATE BATTLE</h1></div>
+          <div class="cr-tools">
+            <button class="tool" id="crSortDn" title="Most expensive first"><i data-i="sortdn"></i></button>
+            <button class="tool" id="crSortUp" title="Cheapest first"><i data-i="sortup"></i></button>
+            <button class="tool" id="crShuffle" title="Shuffle order"><i data-i="shuffle"></i></button>
+            <span class="tool-sep"></span>
+            <button class="tool txt" id="crClear"><i data-i="trash"></i>CLEAR CASES</button>
+            <span class="cr-rounds" id="crRounds">0 rounds</span>
+          </div>
+          <div class="cr-grid" id="crGrid"></div>
+        </div>
+
+        <aside class="cr-side">
+          <div class="cr-sum">
+            <div class="sum-row"><span>Your entry</span><b><span class="coin sm"></span><span id="crCost">0</span></b></div>
+            <div class="sum-row"><span>Total pot</span><b><span class="coin sm"></span><span id="crPot">0</span></b></div>
+            <button class="btn blue full" id="crGo" disabled>CREATE BATTLE</button>
+            <button class="btn ghost full" id="crBots" disabled>PLAY VS BOTS</button>
+          </div>
+
+          <div class="cr-box">
+            <h4>SETTINGS</h4>
+            <label>Format</label>
+            <div class="seg3" id="crFormat"><button class="on" data-v="solo">Free for all</button><button data-v="teams">Teams</button></div>
+            <label>Players</label>
+            <div class="seg3" id="crPlayers"></div>
+            <label>Pick your seat</label>
+            <div class="seats" id="crSeats"></div>
+          </div>
+
+          <div class="cr-box">
+            <h4>MODE</h4>
+            <div class="modes" id="crModes"></div>
+          </div>
+
+          <div class="cr-box">
+            <h4>OPTIONS</h4>
+            <label class="tog"><span><b>Private battle</b><small>Only people with the link can join</small></span><input type="checkbox" id="crPrivate"><i></i></label>
+            <label class="tog"><span><b>Fast rounds</b><small>Cases open twice as fast</small></span><input type="checkbox" id="crFast"><i></i></label>
+          </div>
+        </aside>
+      </div>
+     </div>
+
+      <section class="row" id="betsSec">
+        <div class="row-h"><h3><i data-i="bolt"></i>LATEST BETS</h3></div>
+        <div class="bets">
+          <div class="b-row head"><span>Game</span><span>Player</span><span>Bet</span><span>Multi</span><span>Payout</span></div>
+          <div id="bets"></div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <span class="logo sm"><span class="mark">LR</span><span>LOOT<b>RUSH</b></span></span>
+        <p>Demo project. Coins are play money with no real value. No deposits, no withdrawals, no real prizes. Not affiliated with Roblox Corporation.</p>
+      </footer>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="cbModal" hidden>
+  <div class="mbox picker">
+    <button class="sq sm m-close" id="cbX"><i data-i="x"></i></button>
+    <div class="pf">
+      <label class="pf-f grow"><span>Search</span><span class="inp"><i data-i="search"></i><input id="mQ" placeholder="Case name"></span></label>
+      <label class="pf-f"><span>Min price</span><span class="inp"><span class="coin sm"></span><input id="mMin" type="number" min="0" placeholder="0"></span></label>
+      <label class="pf-f"><span>Max price</span><span class="inp"><span class="coin sm"></span><input id="mMax" type="number" min="0" placeholder="∞"></span></label>
+      <label class="pf-f"><span>Sort by</span><span class="inp"><select id="mSort"><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option><option value="risk-asc">Safest first</option><option value="risk-desc">Riskiest first</option><option value="name-asc">Name A to Z</option></select></span></label>
+      <div class="pf-f"><span>Win chance</span><div class="riskchips" id="mRisk"></div></div>
+    </div>
+    <div class="pt">
+      <div class="seg" id="mTabs"><button class="on" data-t="all">All</button><button data-t="fav">Favorites</button><button data-t="new">New</button></div>
+      <label class="tog mini"><span><b>Community cases</b></span><input type="checkbox" id="mComm" checked><i></i></label>
+    </div>
+    <div class="m-cases pgrid" id="mCases"></div>
+    <div class="m-f pfoot">
+      <span class="pv">Total value <b><span class="coin sm"></span><span id="mTotal">0</span></b></span>
+      <span class="pv">Balance after <b><span class="coin sm"></span><span id="mAfter">0</span></b></span>
+      <span class="pv muted"><b id="mCount">0</b> / 25 cases</span>
+      <button class="btn blue" id="mDone">DONE</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
