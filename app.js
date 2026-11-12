@@ -582,9 +582,10 @@
       // bait: a rare item sits right next to the winner; the reel stops half on it, then creeps off (or onto it)
       this.bait = Math.random() < .7 ? (Math.random() < .55 ? -1 : 1) : 0;
       if (this.bait) this.items[TGT + this.bait] = pick(rare);
-      if (Math.random() < .5) this.items[TGT - this.bait || TGT - 1] = pick(rare.concat(pool.slice(5)));
+      if (Math.random() < .5) this.items[this.bait ? TGT - this.bait : TGT - 1] = pick(rare.concat(pool.slice(5)));   // decoy next to the winner, never on it
       for (let i = 4; i < LEN - 4; i++) if (i !== TGT && Math.random() < .03) this.items[i] = STOCK;
       if (!target.stock && Math.random() < .12) this.items[TGT + (Math.random() < .5 ? 1 : -1)] = STOCK;
+      this.items[TGT] = target;
       this.end = TGT * SLOT;
       this.s = 3 * SLOT; this.lastC = -1; this.landed = false;
       this.pool.forEach(d => { d._i = -1; d.className = "vi"; });
