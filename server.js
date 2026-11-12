@@ -153,7 +153,7 @@ const handlers = {
   },
   create(ws, m, rid) {
     const u = ws.user && userOf(ws.user); if (!u) return send(ws, { t: "res", rid, err: "Log in to create a battle" });
-    const t = FORMATS.includes(m.t) ? m.t : "1v1", cs = (Array.isArray(m.cs) ? m.cs : []).map(Number).filter(k => k >= 0 && k < POOLS.length).slice(0, 25);
+    const t = FORMATS.includes(m.size) ? m.size : "1v1", cs = (Array.isArray(m.cs) ? m.cs : []).map(Number).filter(k => k >= 0 && k < POOLS.length).slice(0, 25);
     if (!cs.length) return send(ws, { t: "res", rid, err: "Add at least one case" });
     const mods = (Array.isArray(m.mods) ? m.mods : []).filter(x => ["jackpot", "underdog", "terminal", "fast", "funded"].includes(x));
     const borrow = mods.includes("funded") ? Math.min(.9, Math.max(.1, Math.round((+m.borrow || .5) * 20) / 20)) : 0;
