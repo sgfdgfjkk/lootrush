@@ -34,7 +34,7 @@ const ODDS = { 9: "50 30 14.5 5 0.5", 10: "55 25 12 5 2 1", 11: "50 30 15 3 1.5 
 const VOL = 1.35;   // higher = more volatile (cheap items more common, top items rarer)
 const POOLS = CASE_ITEMS.map((s, ci) => { const its = s.split(" ").map(k => V[k]), w = ODDS[ci] ? ODDS[ci].split(" ").map(Number) : its.map(v => Math.pow(v, -VOL)), S = w.reduce((a, c) => a + c, 0); return its.map((v, i) => ({ v, ch: w[i] / S * 100, w: w[i], S })); });
 const PRICE = POOLS.map(p => Math.round(p.reduce((a, x) => a + x.v * x.w / x.S, 0) / .92));   // same maths as app.js
-const BOTS = ["Babyalien", "Downyluck", "Elonmusk", "Jamal", "Saint","Speed"];
+const BOTS = ["BaconHairBandit", "NoobSlayer9000", "Sir_Lags_Alot", "OofMaster", "RobuxBeggar", "GrandmaGamer", "CertifiedNoob", "Sweaty_Tryhard", "LagWizard", "DadOfTheYear", "BuilderGuy404", "ChunkyMilk", "BruhMoment", "UnpaidIntern", "TouchGrassPls", "TaxEvader3000", "Guest_1337", "WiFiBandit", "SpicyNugget", "ClumsyKnight", "MomSaidNo", "PizzaRat", "SnackGoblin", "TrashPanda", "HappyFlop"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const rollIdx = (k) => { let x = Math.random() * 100; const p = POOLS[k]; for (let i = 0; i < p.length; i++) { x -= p[i].ch; if (x <= 0) return i; } return 0; };
 const rollBonus = (k) => { const n = POOLS[k].length, h = Math.floor(n / 2), w = []; for (let i = h; i < n; i++) w.push(Math.pow(.5, i - h + 1)); const S = w.reduce((a, c) => a + c, 0);
@@ -105,7 +105,7 @@ setInterval(() => {
   if (Math.random() < .35) rain.pot += 5 + Math.floor(Math.random() * 40);
   if (Date.now() < rain.end) return;
   const js = [...rain.joined].map(userOf).filter(Boolean);
-  if (js.length) { const share = rain.pot / js.length; js.forEach(u => { u.bal += share; pushMe(u, share); }); save(); sysChat(`Rain paid ${(rain.pot / 1000).toFixed(2)} to ${js.length} player${js.length > 1 ? "s" : ""}!`); }
+  if (js.length) { const share = rain.pot / js.length; js.forEach(u => { u.bal += share; pushMe(u, share); }); save(); sysChat(`Rain paid ${(rain.pot / 2).toFixed(2)} to ${js.length} player${js.length > 1 ? "s" : ""}!`); }
   rain.pot = 1000 + Math.floor(Math.random() * 800); rain.end = Date.now() + 300000; rain.joined.clear();
   all({ t: "rain", pot: rain.pot, end: rain.end, joined: false });
 }, 1000);
@@ -151,14 +151,14 @@ const handlers = {
     if (!u) return send(ws, { t: "res", rid, err: "Log in first" });
     if (!to) return send(ws, { t: "res", rid, err: "You can only tip real players" });
     if (to === u) return send(ws, { t: "res", rid, err: "You can't tip yourself" });
-    if (amt < 10) return send(ws, { t: "res", rid, err: "Minimum tip is 0.01" });
+    if (amt < 10) return send(ws, { t: "res", rid, err: "Minimum tip is 5.00" });
     if ((u.wag || 0) < TIP_MIN_WAGER) return send(ws, { t: "res", rid, err: "Wager more before tipping" });
     if (u.tipDay !== today()) { u.tipDay = today(); u.tipped = 0; }
     if (u.tipped + amt > TIP_DAY_LIMIT) return send(ws, { t: "res", rid, err: "That's over your daily tip limit" });
     if (amt > u.bal) return send(ws, { t: "res", rid, err: "You don't have that much" });
     u.bal -= amt; u.tipped += amt; to.bal += amt; save();
     pushMe(u); pushMe(to, amt); send(ws, { t: "res", rid, ok: 1 });
-    sysChat(`${u.u} tipped @${to.u} ${(amt / 1000).toFixed(2)}`);
+    sysChat(`${u.u} tipped @${to.u} ${(amt / 2).toFixed(2)}`);
   },
   create(ws, m, rid) {
     const u = ws.user && userOf(ws.user); if (!u) return send(ws, { t: "res", rid, err: "Log in to create a battle" });
