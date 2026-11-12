@@ -7,6 +7,11 @@ const PORT = process.env.PORT || 3000;
 const ROOT = __dirname;
 const DATA = process.env.DATA_DIR || path.join(ROOT, "data");
 const ADMINS = (process.env.ADMIN_USERS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+// Password mode: set SITE_PASSWORD on Render and everyone must enter it (any username) before the site loads.
+const SITE_PASSWORD = process.env.SITE_PASSWORD || "";
+const gateOk = (req) => { if (!SITE_PASSWORD) return true; const h = req.headers.authorization || ""; if (!h.startsWith("Basic ")) return false;
+  const pw = Buffer.from(h.slice(6), "base64").toString().split(":").slice(1).join(":"); const a = Buffer.from(pw), b = Buffer.from(SITE_PASSWORD);
+  return a.length === b.length && crypto.timingSafeEqual(a, b); };
 const START_BAL = 0;                     // new accounts start empty; the admin gives balance
 const TIP_MIN_WAGER = 5000, TIP_DAY_LIMIT = 100000;
 
@@ -197,6 +202,7 @@ const handlers = {
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".svg": "image/svg+xml", ".mp4": "video/mp4", ".webm": "video/webm", ".gif": "image/gif", ".ico": "image/x-icon", ".json": "application/json" };
 const BLOCK = /^\/(data|node_modules|\.|server\.js|package|old\/|_render)/i;
 const server = http.createServer((req, res) => {
+  if (!gateOk(req)) { res.writeHead(401, { "www-authenticate": 'Basic realm="LootRush (password needed)"', "content-type": "text/plain" }); return res.end("LootRush is in password mode."); }
   let p = decodeURIComponent(req.url.split("?")[0]);
   if (p === "/net-config.js") { res.writeHead(200, { "content-type": "text/javascript", "cache-control": "no-store" }); return res.end("window.LR_SERVER = true;"); }
   if (p === "/") p = "/index.html";
@@ -208,7 +214,7 @@ const server = http.createServer((req, res) => {
     fs.createReadStream(f).pipe(res);
   });
 });
-const wss = new WebSocketServer({ server, path: "/ws", maxPayload: 16 * 1024 });
+const wss = new WebSocketServer({ server, path: "/ws", maxPayload: 16 * 1024, verifyClient: (info) => gateOk(info.req) });
 wss.on("connection", (ws) => {
   clients.add(ws); all({ t: "online", n: clients.size });
   ws.on("message", (raw) => { let m; try { m = JSON.parse(raw); } catch (e) { return; } const h = handlers[m.t]; if (h) try { h(ws, m, m.rid); } catch (e) { console.error(e); } });
