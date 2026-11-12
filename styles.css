@@ -1397,3 +1397,4 @@ body{background:var(--bg)}
 .coin::after{display:none!important}
 /* own chat messages: no outline */
 .m.me .bub{border-color:transparent!important}
+.m.me .av,.m .av{border-color:transparent!important;box-shadow:none!important;outline:0!important}
