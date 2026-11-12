@@ -34,7 +34,7 @@ const ODDS = { 9: "50 30 14.5 5 0.5", 10: "55 25 12 5 2 1", 11: "50 30 15 3 1.5 
 const VOL = 1.35;   // higher = more volatile (cheap items more common, top items rarer)
 const POOLS = CASE_ITEMS.map((s, ci) => { const its = s.split(" ").map(k => V[k]), w = ODDS[ci] ? ODDS[ci].split(" ").map(Number) : its.map(v => Math.pow(v, -VOL)), S = w.reduce((a, c) => a + c, 0); return its.map((v, i) => ({ v, ch: w[i] / S * 100, w: w[i], S })); });
 const PRICE = POOLS.map(p => Math.round(p.reduce((a, x) => a + x.v * x.w / x.S, 0) / .92));   // same maths as app.js
-const BOTS = ["BaconHairBandit", "NoobSlayer9000", "Sir_Lags_Alot", "OofMaster", "RobuxBeggar", "GrandmaGamer", "CertifiedNoob", "Sweaty_Tryhard", "LagWizard", "DadOfTheYear", "BuilderGuy404", "ChunkyMilk", "BruhMoment", "UnpaidIntern", "TouchGrassPls", "TaxEvader3000", "Guest_1337", "WiFiBandit", "SpicyNugget", "ClumsyKnight", "MomSaidNo", "PizzaRat", "SnackGoblin", "TrashPanda", "HappyFlop"];
+const BOTS = ["Babyalien", "Downyluck", "Elonmusk", "Jamal", "Saint","Speed"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const rollIdx = (k) => { let x = Math.random() * 100; const p = POOLS[k]; for (let i = 0; i < p.length; i++) { x -= p[i].ch; if (x <= 0) return i; } return 0; };
 const rollBonus = (k) => { const n = POOLS[k].length, h = Math.floor(n / 2), w = []; for (let i = h; i < n; i++) w.push(Math.pow(.5, i - h + 1)); const S = w.reduce((a, c) => a + c, 0);
