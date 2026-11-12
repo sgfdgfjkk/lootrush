@@ -1392,3 +1392,8 @@ body{background:var(--bg)}
 .layout.offline::after{content:"Reconnecting to LootRush...";position:fixed;left:50%;top:66px;transform:translateX(-50%);z-index:150;padding:8px 16px;border-radius:10px;background:#3a1f25;border:1px solid #ff5468;color:#ffb3bd;font-weight:800;font-size:12.5px}
 .adm-ul{gap:10px 14px;font-size:12px;color:var(--t2);max-height:110px;overflow:auto}.adm-ul>span{display:flex;align-items:center;gap:4px}
 .bt-empty{background:none!important;border:0!important;box-shadow:none!important}
+/* coin icon = LootRush pentagon badge */
+.coin{clip-path:none;border-radius:0;background:url(img/coin_badge.png) center/contain no-repeat;box-shadow:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
+.coin::after{display:none!important}
+/* own chat messages: no outline */
+.m.me .bub{border-color:transparent!important}
