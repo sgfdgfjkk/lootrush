@@ -513,7 +513,7 @@
     if (NET.on) {
       if (!window.LR_USER) { toast(`${ic("user")} Log in to create battles`); return LR_AUTH.open(); }
       if (crCost() > LR.bal) return toast(`${ic("clock")} Not enough balance`);
-      NET.req("create", { t: cr.t, cs: [...cr.cases], mods, borrow: crBorrow(), shared: cr.format === "shared", seat: cr.seat, bots: vsBots }).then(r => {
+      NET.req("create", { size: cr.t, cs: [...cr.cases], mods, borrow: crBorrow(), shared: cr.format === "shared", seat: cr.seat, bots: vsBots }).then(r => {
         if (r.err) return toast(`${ic("clock")} ${r.err}`); cr.cases = []; drawStage(); location.hash = "battle-" + r.id;
         toast(`${ic("check")} ${vsBots ? "Battle vs bots started" : "Battle created. Send the link or wait for friends to join"}`); });
       return;
