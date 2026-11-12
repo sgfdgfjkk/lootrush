@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 const ROOT = __dirname;
 const DATA = process.env.DATA_DIR || path.join(ROOT, "data");
 const ADMINS = (process.env.ADMIN_USERS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-const START_BAL = 10000;                 // new accounts start with $10 (1,000 coins = $1)
+const START_BAL = 0;                     // new accounts start empty; the admin gives balance
 const TIP_MIN_WAGER = 5000, TIP_DAY_LIMIT = 100000;
 
 // ---------------------------------------------------------------- storage
