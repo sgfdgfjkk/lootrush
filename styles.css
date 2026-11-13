@@ -980,12 +980,12 @@ body{background:var(--bg)}
 .vi[data-t="3"] img[src*="stocking"]{width:96px;height:96px}
 .pop-c{position:absolute;left:50%;top:20%;z-index:6;width:20px;height:20px;margin:-10px}
 .vr.bonus{box-shadow:inset 0 0 0 2px rgba(61,139,255,.55),inset 0 0 40px rgba(61,139,255,.15)}
-.hc.bon::after{content:"";position:absolute;right:8px;top:8px;width:24px;height:24px;background:url(img/coin3d.png?v=4) center/contain no-repeat;filter:drop-shadow(0 0 6px rgba(255,190,70,.7))}
+.hc.bon::after{content:"";position:absolute;right:8px;top:8px;width:24px;height:24px;background:url(img/coin3d.png?v=5) center/contain no-repeat;filter:drop-shadow(0 0 6px rgba(255,190,70,.7))}
 /* ===== loot stocking bonus ===== */
 .s3d{position:absolute;inset:-14px;background:url(img/stocking_spin.png) 0 0/3600% 100% no-repeat;filter:drop-shadow(0 8px 10px rgba(0,0,0,.5))}
 .pop-c{position:absolute;left:50%;top:20%;z-index:6;width:20px;height:20px;margin:-10px}
 .vr.bonus{box-shadow:inset 0 0 0 2px rgba(61,139,255,.55),inset 0 0 40px rgba(61,139,255,.15)}
-.hc.bon::after{content:"";position:absolute;right:8px;top:8px;width:24px;height:24px;background:url(img/coin3d.png?v=4) center/contain no-repeat;filter:drop-shadow(0 0 6px rgba(255,190,70,.7))}
+.hc.bon::after{content:"";position:absolute;right:8px;top:8px;width:24px;height:24px;background:url(img/coin3d.png?v=5) center/contain no-repeat;filter:drop-shadow(0 0 6px rgba(255,190,70,.7))}
 
 /* ===== GOLD SPIN coin ===== */
 .c3d{position:absolute;inset:-6px;background:url(img/coin_spin.png?v=4) 0 0/3600% 100% no-repeat;filter:drop-shadow(0 8px 12px rgba(0,0,0,.55));overflow:hidden;border-radius:50%;z-index:2}
@@ -1525,9 +1525,26 @@ body{background:var(--bg)}
 .gsw svg{position:absolute;left:0;width:100%;top:0;transform:translateY(-50%);overflow:visible;filter:drop-shadow(0 0 5px rgba(255,190,60,.8))}
 .gsw-b{z-index:1}.gsw-b svg{clip-path:inset(0 0 50% 0)}
 .gsw-f{z-index:3}.gsw-f svg{clip-path:inset(50% 0 0 0)}
-.c3d-shine{-webkit-mask:url(img/coin3d.png?v=4) center/100% 100% no-repeat;mask:url(img/coin3d.png?v=4) center/100% 100% no-repeat;border-radius:0}
+.c3d-shine{-webkit-mask:url(img/coin3d.png?v=5) center/100% 100% no-repeat;mask:url(img/coin3d.png?v=5) center/100% 100% no-repeat;border-radius:0}
 .c3d-glow{display:none!important}
 .vi[data-s="1"]:has(img[src*="coin3d"]) .vi-in::before{display:none!important}
 /* blackjack buttons: regular site font, lighter weight */
 .bj-acts button,#bjGo{font-family:var(--body);font-weight:600;font-size:15px;letter-spacing:.3px}
 .bj-acts #bjDouble{font-size:14px}
+.c3f{background-image:url(img/coin_flip.png?v=2)}
+/* gold spin VFX: rays at the peak, star twinkles, landing ring */
+.gfx-rays{position:absolute;left:50%;top:50%;width:230px;height:230px;margin:-115px 0 0 -115px;border-radius:50%;z-index:1;opacity:0;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(255,214,110,.55) 0 7deg,transparent 7deg 24deg);
+  -webkit-mask:radial-gradient(closest-side,#000 18%,transparent 100%);mask:radial-gradient(closest-side,#000 18%,transparent 100%)}
+.gfx-star{position:absolute;z-index:4;pointer-events:none;opacity:0;
+  background:radial-gradient(closest-side,#fff 0 30%,rgba(255,220,120,.9) 45%,transparent 70%);
+  clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);filter:drop-shadow(0 0 4px rgba(255,210,90,.9))}
+.gfx-ring{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;z-index:1;pointer-events:none;
+  border:3px solid rgba(255,210,100,.85);box-shadow:0 0 16px rgba(255,190,60,.6),inset 0 0 12px rgba(255,190,60,.4)}
+.vr-lab::after{display:none!important}
+.gfx-rays{display:none!important}
+/* the carved R catches the light at the top of the flip (same gold, just a moving glint) */
+.c3d-rglint{position:absolute;inset:0;z-index:3;opacity:0;pointer-events:none;mix-blend-mode:screen;
+  background:linear-gradient(105deg,transparent 36%,rgba(255,226,150,.55) 44%,rgba(255,244,214,.95) 50%,rgba(255,226,150,.55) 56%,transparent 64%) -60% 0/240% 100% no-repeat;
+  -webkit-mask:url(img/coin_rmask.png) center/100% 100% no-repeat;mask:url(img/coin_rmask.png) center/100% 100% no-repeat}
+.c3d-shine{background:linear-gradient(100deg,transparent 40%,rgba(255,248,220,.85) 50%,transparent 60%) -120% 0/250% 100% no-repeat;transform:none!important}
