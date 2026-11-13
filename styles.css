@@ -980,15 +980,15 @@ body{background:var(--bg)}
 .vi[data-t="3"] img[src*="stocking"]{width:96px;height:96px}
 .pop-c{position:absolute;left:50%;top:20%;z-index:6;width:20px;height:20px;margin:-10px}
 .vr.bonus{box-shadow:inset 0 0 0 2px rgba(61,139,255,.55),inset 0 0 40px rgba(61,139,255,.15)}
-.hc.bon::after{content:"";position:absolute;right:8px;top:8px;width:24px;height:24px;background:url(img/coin3d.png) center/contain no-repeat;filter:drop-shadow(0 0 6px rgba(255,190,70,.7))}
+.hc.bon::after{content:"";position:absolute;right:8px;top:8px;width:24px;height:24px;background:url(img/coin3d.png?v=4) center/contain no-repeat;filter:drop-shadow(0 0 6px rgba(255,190,70,.7))}
 /* ===== loot stocking bonus ===== */
 .s3d{position:absolute;inset:-14px;background:url(img/stocking_spin.png) 0 0/3600% 100% no-repeat;filter:drop-shadow(0 8px 10px rgba(0,0,0,.5))}
 .pop-c{position:absolute;left:50%;top:20%;z-index:6;width:20px;height:20px;margin:-10px}
 .vr.bonus{box-shadow:inset 0 0 0 2px rgba(61,139,255,.55),inset 0 0 40px rgba(61,139,255,.15)}
-.hc.bon::after{content:"";position:absolute;right:8px;top:8px;width:24px;height:24px;background:url(img/coin3d.png) center/contain no-repeat;filter:drop-shadow(0 0 6px rgba(255,190,70,.7))}
+.hc.bon::after{content:"";position:absolute;right:8px;top:8px;width:24px;height:24px;background:url(img/coin3d.png?v=4) center/contain no-repeat;filter:drop-shadow(0 0 6px rgba(255,190,70,.7))}
 
 /* ===== GOLD SPIN coin ===== */
-.c3d{position:absolute;inset:-6px;background:url(img/coin_spin.png) 0 0/3600% 100% no-repeat;filter:drop-shadow(0 8px 12px rgba(0,0,0,.55));overflow:hidden;border-radius:50%;z-index:2}
+.c3d{position:absolute;inset:-6px;background:url(img/coin_spin.png?v=4) 0 0/3600% 100% no-repeat;filter:drop-shadow(0 8px 12px rgba(0,0,0,.55));overflow:hidden;border-radius:50%;z-index:2}
 .c3d-shine{position:absolute;inset:0;background:linear-gradient(100deg,transparent 35%,rgba(255,248,220,.85) 50%,transparent 65%);mix-blend-mode:screen;opacity:0;border-radius:50%}
 .c3d-glow{position:absolute;inset:-46px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,200,90,.55),rgba(255,170,50,.18) 55%,transparent);z-index:1;opacity:0;filter:blur(2px)}
 .vr.gold{box-shadow:inset 0 0 0 2px rgba(255,201,77,.5),inset 0 0 60px rgba(255,180,60,.14);transition:box-shadow .4s}
@@ -1398,3 +1398,136 @@ body{background:var(--bg)}
 /* own chat messages: no outline */
 .m.me .bub{border-color:transparent!important}
 .m.me .av,.m .av{border-color:transparent!important;box-shadow:none!important;outline:0!important}
+/* jackpot: winner glow stays inside its own slice */
+.jp-seg.hit .jp-in{transform:none;box-shadow:inset 0 0 0 2px var(--c),inset 0 0 40px color-mix(in srgb,var(--c) 40%,transparent)}
+
+/* ===================== BLACKJACK ===================== */
+#view-blackjack{padding-bottom:30px}
+.page:has(> #view-blackjack:not([hidden])){max-width:none;padding:18px 22px 0}
+.bjw{display:grid;grid-template-columns:290px 1fr;gap:0;border-radius:16px;overflow:hidden;background:#1d2025;border:1px solid #2c2f35;box-shadow:0 4px 0 #17191d}
+.bj-side{display:flex;flex-direction:column;gap:12px;padding:16px;background:#202328;border-right:1px solid #2c2f35}
+.bj-tabs{display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:11px;background:#17191d;border:1px solid #2a2d33}
+.bj-tabs button{height:36px;border:0;border-radius:8px;background:none;color:var(--t3);font:inherit;font-weight:800;font-size:13px;cursor:pointer}
+.bj-tabs button.on{background:#2f333a;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.bj-l{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--t3);margin-bottom:-6px}
+.bj-bet{display:flex;align-items:center;gap:6px;height:48px;padding:0 6px 0 12px;border-radius:11px;background:#16181c;border:1px solid #2e3138}
+.bj-bet:focus-within{border-color:var(--a);box-shadow:0 0 0 3px rgba(61,139,255,.18)}
+.bj-bet input{flex:1;min-width:0;height:100%;border:0;outline:0;background:none;color:#fff;font:inherit;font-size:15px;font-weight:800}
+.bj-bet input::-webkit-outer-spin-button,.bj-bet input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.bj-bet input{-moz-appearance:textfield}
+.bj-bet button{height:32px;min-width:34px;padding:0 8px;border-radius:7px;border:1px solid #3a3e46;background:#2a2d33;color:var(--t2);font:inherit;font-weight:800;font-size:12px;cursor:pointer}
+.bj-bet button:hover{color:#fff;background:#33373e}
+.bj-rules{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:11px;background:#1a1c20;border:1px solid #2a2d33;font-size:12px;font-weight:700;color:var(--t3)}
+.bj-rules span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:2px;background:var(--a);margin-right:8px;vertical-align:1px}
+.bj-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
+.bj-acts[hidden]{display:none}
+.bj-acts button{height:52px;border-radius:11px;cursor:pointer;font:inherit;font-family:var(--head);font-size:16px;letter-spacing:.6px;color:#fff;border:1px solid #3a3e46;background:linear-gradient(180deg,#33373e,#2a2d33);box-shadow:0 4px 0 #191b1f;transition:transform .1s,filter .15s}
+.bj-acts button:hover:not(:disabled){filter:brightness(1.12)}.bj-acts button:active:not(:disabled){transform:translateY(2px);box-shadow:0 2px 0 #191b1f}
+.bj-acts #bjHit{background:linear-gradient(180deg,#5aa0ff,#2f7dff);border-color:#5aa0ff;box-shadow:0 4px 0 #1d56b8}
+.bj-acts #bjDouble{grid-column:span 2;height:44px;font-size:14px}
+.bj-acts button:disabled{opacity:.4;cursor:not-allowed}
+#bjGo{margin-top:auto;height:54px;font-size:17px}
+.bj-stage{position:relative;display:flex;flex-direction:column;padding:26px 30px 0;min-height:640px;background:radial-gradient(80% 60% at 50% 30%,#232831,#1b1e23)}
+/* the table: rail + U-shaped felt */
+.bj-table{position:relative;flex:1;max-width:980px;width:100%;margin:0 auto}
+.bj-rail{position:absolute;left:0;right:0;top:0;height:64px;z-index:2;pointer-events:none}
+.bj-rail i{position:absolute;top:0;height:62px;border-radius:18px 18px 8px 8px;background:repeating-linear-gradient(-45deg,rgba(255,255,255,.05) 0 3px,transparent 3px 7px),linear-gradient(180deg,#5b6d99,#3e4d73);box-shadow:inset 0 2px 0 rgba(255,255,255,.18),0 6px 14px rgba(0,0,0,.4)}
+.bj-rail .l{left:0;width:120px}.bj-rail .r{right:0;width:120px}
+.bj-rail .m{left:110px;right:110px;top:6px;height:26px;border-radius:6px;background:linear-gradient(180deg,#4a4f58,#2e3238);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.bj-felt{position:relative;margin-top:22px;height:calc(100% - 22px);min-height:540px;border-radius:24px 24px 50% 50%/24px 24px 42% 42%;
+  background:radial-gradient(90% 70% at 50% 15%,#36406a 0%,#252b45 45%,#1b2034 80%),#1b2034;
+  border:14px solid #2c3036;border-top:none;box-shadow:inset 0 -8px 30px rgba(0,0,0,.45),inset 0 20px 50px rgba(110,140,255,.08),0 30px 60px -20px rgba(0,0,0,.7),0 0 0 2px #3a3f47;overflow:hidden}
+.bj-felt::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 40% at 50% 100%,rgba(61,139,255,.12),transparent 70%);pointer-events:none}
+.bj-arc{position:absolute;left:4%;right:4%;top:34%;width:92%;height:auto;pointer-events:none;overflow:visible}
+.bj-arc text{font-family:var(--head);font-size:24px;letter-spacing:3px;fill:#dfe6f7;opacity:.9}
+.bj-arc .ln{fill:none;stroke:#dfe6f7;stroke-width:2;opacity:.55}
+.bj-mid{position:absolute;left:50%;top:calc(34% + 13.5%);transform:translate(-50%,-50%);width:56px;height:56px;display:grid;place-items:center;color:#eef2ff;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.bj-mid [data-i]{width:46px;height:46px}.bj-mid svg{stroke-width:2.2}
+.bj-shoe{position:absolute;right:5%;top:30px;width:74px;height:104px;transform:rotate(6deg)}
+.bj-shoe .bj-card{position:absolute;inset:0}.bj-shoe .bj-card+.bj-card{transform:translate(-4px,-4px)}
+/* cards */
+.bj-card{position:relative;flex:none;width:86px;height:122px;border-radius:9px;background:linear-gradient(180deg,#fff,#eef1f6);box-shadow:0 8px 16px rgba(0,0,0,.4),inset 0 0 0 1px rgba(0,0,0,.08);color:#16181c;font-family:var(--body)}
+.bj-card.red{color:#e2364f}
+.bj-card i{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:.95;font-style:normal;font-weight:900;font-size:19px}
+.bj-card i em{font-style:normal;font-size:15px}
+.bj-card .tl{left:7px;top:7px}.bj-card .br{right:7px;bottom:7px;transform:rotate(180deg)}
+.bj-card b{position:absolute;inset:0;display:grid;place-items:center;font-size:40px;font-weight:400}
+.bj-card.back{background:repeating-linear-gradient(45deg,rgba(255,255,255,.08) 0 6px,transparent 6px 12px),linear-gradient(160deg,#5aa0ff,#2f6fe0);border:4px solid #fff;box-sizing:border-box}
+.bj-card.back::after{content:"";position:absolute;inset:22% 18%;background:url(img/coin_badge.png) center/contain no-repeat;opacity:.9}
+.bj-card.flip{animation:bjFlip .4s ease both}
+@keyframes bjFlip{0%{transform:rotateY(90deg)}100%{transform:none}}
+/* hands */
+.bj-hand{position:absolute;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px}
+.bj-hand.dealer{top:70px}.bj-hand.player{bottom:12%}
+.bj-cards{display:flex;min-height:122px}
+.bj-cards .bj-card+.bj-card{margin-left:-48px}
+.bj-score{min-width:40px;height:26px;padding:0 10px;border-radius:8px;display:grid;place-items:center;font-weight:900;font-size:13px;color:#fff;background:#2c3037;border:1px solid #41464f;box-shadow:0 3px 0 #17191d}
+.bj-hand.player .bj-score{order:-1}
+.bj-hand.dealer{flex-direction:column-reverse}
+.bj-score.hot{background:var(--a);border-color:var(--a-hi)}
+.bj-score.bust{background:#ff5468;border-color:#ff8090}
+.bj-hand.player.win .bj-card{box-shadow:0 0 0 3px var(--a-hi),0 8px 20px rgba(61,139,255,.45)}
+.bj-hand.player.lose .bj-card{filter:brightness(.7)}
+.bj-msg{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%) scale(.8);display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 26px;border-radius:14px;background:rgba(20,22,27,.88);border:1px solid #3a3e46;opacity:0;pointer-events:none;transition:opacity .25s,transform .35s var(--ease);z-index:3}
+.bj-msg.show{opacity:1;transform:translate(-50%,-50%)}
+.bj-msg b{font-family:var(--head);font-weight:400;font-size:28px;letter-spacing:1px}
+.bj-msg span{display:flex;align-items:center;gap:5px;font-weight:800;font-size:16px}
+.bj-msg.win{border-color:var(--a);box-shadow:0 0 30px rgba(61,139,255,.35)}.bj-msg.win b{color:#8fc1ff}
+.bj-msg.lose b{color:#ff8090}.bj-msg.push b{color:#fff}
+.bj-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px;margin:10px -30px 0;padding:0 22px;border-top:1px solid #2a2d33;font-size:12px;font-weight:700;color:var(--t3)}
+.bj-foot>span{display:flex;align-items:center;gap:6px}.bj-foot [data-i]{width:14px;height:14px}
+.bj-logo{font-family:var(--head);font-size:15px;color:#fff;letter-spacing:.4px}.bj-logo b{font-weight:400;color:var(--a-hi)}.bj-logo img{width:20px;height:20px}
+#bjLast{min-width:120px;justify-content:flex-end}
+@media (max-width:900px){.bjw{grid-template-columns:1fr}.bj-side{border-right:0;border-bottom:1px solid #2c2f35}.bj-stage{padding:16px 12px 0;min-height:520px}.bj-card{width:64px;height:92px}.bj-cards .bj-card+.bj-card{margin-left:-34px}.bj-arc text{font-size:30px}}
+.bj-card .cd-tl{left:7px;top:7px}.bj-card .cd-br{right:7px;bottom:7px;transform:rotate(180deg)}
+.bj-card .cd-mid{position:absolute;inset:0;display:grid;place-items:center;font-size:42px;font-weight:400;background:none;border:0;line-height:1}
+.bj-cards .bj-card+.bj-card{margin-left:-32px}
+.bj-arc{top:43%}.bj-mid{top:calc(43% + 13.5%)}
+.bj-hand.dealer{top:64px}.bj-hand.player{bottom:5%}
+.bj-msg{top:50%}
+.bj-felt{min-height:600px}
+.bj-logo{gap:0!important}.bj-logo img{margin-right:7px}.bj-msg.show~.bj-mid,.bj-felt:has(.bj-msg.show) .bj-mid{opacity:0;transition:opacity .2s}
+/* blackjack v2: rendered table, outlines show who won */
+.bj-stage{background:#090a0c;padding:22px 26px 0}
+.bj-table{aspect-ratio:1800/1260;flex:none;max-width:1000px}
+.bj-felt{position:absolute;inset:0;margin:0;height:auto;min-height:0;border:0;border-radius:0;background:none;box-shadow:none;overflow:visible}
+.bj-felt::before,.bj-rail,.bj-arc,.bj-mid,.bj-msg{display:none!important}
+.bj-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none}
+.bj-shoe{right:12%;top:15%;width:70px;height:100px}
+.bj-hand.dealer{top:15%}.bj-hand.player{top:58%;bottom:auto}
+.bj-hand.dealer{flex-direction:column}
+.bj-hand.dealer .bj-score{order:2}
+.bj-card{transition:box-shadow .3s,filter .3s}
+.bj-hand.win .bj-card{box-shadow:0 0 0 3px #4d9bff,0 0 18px rgba(77,155,255,.55),0 8px 16px rgba(0,0,0,.4)}
+.bj-hand.lose .bj-card{box-shadow:0 0 0 3px #ff4d63,0 0 16px rgba(255,77,99,.45),0 8px 16px rgba(0,0,0,.4);filter:none}
+.bj-hand.push .bj-card{box-shadow:0 0 0 3px #e9edf5,0 8px 16px rgba(0,0,0,.4)}
+.bj-hand.win .bj-score{background:#2f7dff;border-color:#5aa0ff}
+.bj-hand.lose .bj-score{background:#ff4d63;border-color:#ff8090}
+.bj-foot{margin:10px -26px 0;border-top-color:#1a1c20;background:#0d0e11}
+/* SWORDS CLASH bonus (alternative to Gold Spin) */
+.clash{position:absolute;inset:-18px;background:url(img/clash_sheet.png) 0 0/4000% 100% no-repeat;z-index:2;will-change:background-position;transform:translateZ(0)}
+.clash-glow{position:absolute;inset:-40px;border-radius:50%;background:radial-gradient(closest-side,rgba(170,200,255,.5),rgba(90,140,255,.16) 55%,transparent);z-index:1;opacity:0;will-change:transform,opacity}
+.adm-fx{align-items:center}.adm-fx span{font-size:12px;color:#8b93a7;margin-right:auto}
+.adm-fx button.on{background:#2f6fe0;color:#fff;border-color:#2f6fe0}
+.bj-stage{background:#141519}
+.bj-bg{-webkit-mask-image:linear-gradient(90deg,transparent,#000 2.5%,#000 97.5%,transparent),linear-gradient(180deg,transparent,#000 3%,#000 97%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 2.5%,#000 97.5%,transparent),linear-gradient(180deg,transparent,#000 3%,#000 97%,transparent);mask-composite:intersect}
+.vi img[src$="swords_item.png"],.hc img[src$="swords_item.png"]{transform:scale(1.3)}
+.clash-glow{background:radial-gradient(closest-side,rgba(255,205,110,.5),rgba(255,170,60,.16) 55%,transparent)}
+.vi[data-t="3"]:has(img[src$="swords_item.png"]) .vi-in::before{background:radial-gradient(closest-side,rgba(255,200,100,.35),transparent)!important}
+/* Sword Clash tile: a bonus, not an item. Gold rays, glow and a shine sweep */
+.vi[data-s="1"]:has(img[src$="swords_item.png"]) .vi-in::after{content:"";position:absolute;inset:-14px;border-radius:50%;z-index:0;
+  background:repeating-conic-gradient(from 0deg,rgba(255,206,94,.38) 0 9deg,transparent 9deg 30deg);
+  -webkit-mask:radial-gradient(closest-side,#000 25%,transparent 100%);mask:radial-gradient(closest-side,#000 25%,transparent 100%);animation:swRays 6s linear infinite}
+.vi[data-s="1"]:has(img[src$="swords_item.png"]) .vi-in::before{background:radial-gradient(closest-side,rgba(255,196,70,.6),rgba(255,160,40,.18) 60%,transparent)!important;inset:-6px}
+.vi[data-s="1"] img[src$="swords_item.png"]{position:relative;z-index:1;filter:drop-shadow(0 0 6px rgba(255,190,60,.75)) drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+@keyframes swRays{to{transform:rotate(360deg)}}
+/* gold swirl round the Gold Spin coin */
+.gsw{position:absolute;left:-34px;right:-34px;top:50%;height:0;opacity:0;pointer-events:none}
+.gsw svg{position:absolute;left:0;width:100%;top:0;transform:translateY(-50%);overflow:visible;filter:drop-shadow(0 0 5px rgba(255,190,60,.8))}
+.gsw-b{z-index:1}.gsw-b svg{clip-path:inset(0 0 50% 0)}
+.gsw-f{z-index:3}.gsw-f svg{clip-path:inset(50% 0 0 0)}
+.c3d-shine{-webkit-mask:url(img/coin3d.png?v=4) center/100% 100% no-repeat;mask:url(img/coin3d.png?v=4) center/100% 100% no-repeat;border-radius:0}
+.c3d-glow{display:none!important}
+.vi[data-s="1"]:has(img[src*="coin3d"]) .vi-in::before{display:none!important}
+/* blackjack buttons: regular site font, lighter weight */
+.bj-acts button,#bjGo{font-family:var(--body);font-weight:600;font-size:15px;letter-spacing:.3px}
+.bj-acts #bjDouble{font-size:14px}
