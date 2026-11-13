@@ -918,7 +918,7 @@
     const winners = b.players.map((p, i) => ({ p, i })).filter(x => b.shared || teamOf(b, x.i) === b.winner);
     const kicker = me < 0 ? (b.shared ? "POT SHARED" : winners.length > 1 ? "WINNERS" : "WINNER") : won ? "YOU WON" : "YOU LOST";
     const w = document.createElement("div"); w.className = "bv-win" + (won ? " me-won" : me >= 0 ? " me-lost" : "");
-    w.innerHTML = `<div class="bw-rays"></div><div class="bw-in">
+    w.innerHTML = `<div class="bw-rays"></div><i class="bw-ripple"></i><div class="bw-in">
         <span class="bw-k">${kicker}</span>
         <div class="bw-ps">${winners.map((x, k) => `<div class="bw-p" style="--d:${.15 + k * .09}s"><span class="bw-av ${x.p === ME ? "me" : ""}">${face(x.p)}</span><b></b></div>`).join("")}</div>
         <div class="bw-amt"><span class="coin"></span><span class="num" id="bwAmt">0</span>${winners.length > 1 ? "<small>each</small>" : ""}</div>
