@@ -133,6 +133,29 @@
      </div>
 
      <!-- ================= CREATE BATTLE ================= -->
+     <div id="view-blackjack" hidden>
+      <div class="bjw">
+        <aside class="bj-side">
+          <div class="bj-tabs"><button class="on">Manual</button><button data-soon="Auto bet">Auto</button></div>
+          <label class="bj-l">Bet amount</label>
+          <div class="bj-bet"><span class="coin sm"></span><input id="bjBet" type="number" min="0" step="0.5" value="10"><button data-bm="half">&frac12;</button><button data-bm="2x">2x</button><button data-bm="max">Max</button></div>
+          <div class="bj-rules"><span>Blackjack pays 3:2</span><span>Dealer stands on 17</span><span>Double on any 2 cards</span></div>
+          <div class="bj-acts" id="bjActs" hidden><button id="bjHit">Hit</button><button id="bjStand">Stand</button><button id="bjDouble">Double</button></div>
+          <button class="btn blue big full lip" id="bjGo">BET</button>
+        </aside>
+        <div class="bj-stage">
+          <div class="bj-table">
+            <div class="bj-felt">
+              <img class="bj-bg" src="img/bj_table.jpg" alt="" draggable="false">
+              <div class="bj-shoe" id="bjShoe"><span class="bj-card back"></span><span class="bj-card back"></span></div>
+              <div class="bj-hand dealer" id="bjDealer"><span class="bj-score" hidden></span><div class="bj-cards"></div></div>
+              <div class="bj-hand player" id="bjPlayer"><span class="bj-score" hidden></span><div class="bj-cards"></div></div>
+            </div>
+          </div>
+          <div class="bj-foot"><span><i data-i="shield"></i>Provably dealt on the server</span><span class="bj-logo"><img src="img/logo.png" alt="">LOOT<b>RUSH</b></span><span id="bjLast"></span></div>
+        </div>
+      </div>
+     </div>
      <div id="view-create" hidden>
       <div class="cr">
         <div class="cr-main">
@@ -239,6 +262,7 @@
 
 <div class="toast" id="toast"></div>
 <script src="net-config.js"></script>
+<script src="bj-core.js"></script>
 <script src="auth.js"></script>
 <script src="app.js"></script>
 </body>
