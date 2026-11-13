@@ -413,9 +413,9 @@
     b.state = "done"; b.round = b.cs.length; b.winner = w ?? ri(0, grp(b.t).length - 1); b.doneAt = Date.now();
     const src = !$("#view-battle").hidden ? $("#bvArena") : (list.querySelector(`.br[data-id="${b.id}"]`) || $("#bal"));
     const me = b.players.indexOf(ME);
-    if (b.net) { if (me >= 0 && !b.shared && teamOf(b, me) !== b.winner) toast(`${ic("swords")} You lost this battle. Better luck next one`); return; }
-    if (me >= 0 && b.shared) { const share = b.unboxed / b.players.length * (1 - (b.borrow || 0)); addCoins(share, src); toast(`<span class="coin"></span> Shared pot paid you +${fmt(share)} play coins`); return; }
-    if (me >= 0) { if (teamOf(b, me) === b.winner) { const win = b.unboxed / grp(b.t)[b.winner] * (1 - (b.borrow || 0)); addCoins(win, src); toast(`<span class="coin"></span> You won the battle! +${fmt(win)} play coins`); } else toast(`${ic("swords")} You lost this battle. Better luck next one`); }
+    if (b.net) return;   // no won/lost popups
+    if (me >= 0 && b.shared) { const share = b.unboxed / b.players.length * (1 - (b.borrow || 0)); addCoins(share, src); return; }
+    if (me >= 0) { if (teamOf(b, me) === b.winner) { const win = b.unboxed / grp(b.t)[b.winner] * (1 - (b.borrow || 0)); addCoins(win, src); } }
   }
   setInterval(() => {
     battles.forEach(b => {
@@ -580,7 +580,7 @@
     const w = c.odds ? c.odds.split(" ").map(Number) : its.map(x => Math.pow(x.v, -VOL)), S = w.reduce((a, x) => a + x, 0);
     return poolCache[k] = its.map((x, i) => ({ n: x.n, ref: x, v: x.v, t: tierOf(x.v), ch: +(100 * w[i] / S).toFixed(3) }));
   }
-  const STOCK = { n: "Gold Spin", ref: { src: "img/coin3d.png?v=4" }, v: 0, t: 3, ch: 0, stock: 1 };
+  const STOCK = { n: "Gold Spin", ref: { src: "img/coin3d.png?v=5" }, v: 0, t: 3, ch: 0, stock: 1 };
   const ADM = { bonus: !!window.LR_FORCE_BONUS, win: false };
   const bonusChance = () => ADM.bonus ? 1 : 1 / 25;
   function rollBonus(k) { const p = topHalf(casePool(k)), w = p.map((_, i) => 100 * Math.pow(.5, i + 1)); let x = Math.random() * 100; for (let i = 0; i < p.length; i++) { x -= w[i]; if (x <= 0) return p[i]; } return p[0]; }
@@ -785,10 +785,66 @@
         if (p < 1) return requestAnimationFrame(f);
         setF(0); wh && wh.stop();
         S && S.goldLand && S.goldLand(); setTimeout(() => S && S.shine && S.shine(), 120);
-        shine.animate([{ transform: "translateX(-130%) skewX(-20deg)", opacity: 1 }, { transform: "translateX(130%) skewX(-20deg)", opacity: 1 }], { duration: 650, easing: "cubic-bezier(.4,0,.2,1)" });
+        shine.animate([{ backgroundPosition: "-120% 0", opacity: 1 }, { backgroundPosition: "220% 0", opacity: 1 }], { duration: 650, easing: "cubic-bezier(.4,0,.2,1)" });
         burst(R.el, "#ffc94d", 22); shake(R.el.parentElement, 6);
         setTimeout(() => { const out = box.animate([{ transform: "scale(1.25)", opacity: 1 }, { transform: "scale(.5)", opacity: 0 }], { duration: 240, fill: "forwards" });
           setTimeout(() => { glow.remove(); sh.remove(); s.remove(); sw.forEach(e => e.remove()); box.getAnimations().forEach(an => an.cancel()); out.cancel(); img.style.opacity = ""; res(); }, 250); }, 900);
+      })(t0);
+    });
+  }
+  // GOLD SPIN v3 (CS:GO style): pops up toward you, one big end-over-end flip that goes slow-mo at the top and
+  // keeps speeding up on the way down, hits, bounces into a second smaller flip while it shrinks back into its slot,
+  // then settles. Sprite img/coin_flip.png = 72 frames, 5 degrees each (Blender).
+  const flipSprite = new Image(); flipSprite.src = "img/coin_flip.png?v=2";
+  const ease = { io: (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, out: (t) => 1 - Math.pow(1 - t, 2.4) };
+  function flipPop(R) {
+    const d = R && R.pool.find(p => p._i === TGT); if (!d) return sleep(10);
+    const box = d.querySelector(".vi-in"), img = box.querySelector("img"); img.style.opacity = 0; d.style.zIndex = 20;
+    const sh = document.createElement("i"); sh.className = "c3d-shadow"; box.appendChild(sh);
+    const s = document.createElement("i"); s.className = "c3d c3f"; box.appendChild(s);
+    const shine = document.createElement("i"); shine.className = "c3d-shine"; s.appendChild(shine);
+    const rg = document.createElement("i"); rg.className = "c3d-rglint"; s.appendChild(rg);   // light catching the carved R
+    const N = Math.round(flipSprite.naturalWidth / 200) || 36; s.style.backgroundSize = `${N * 100}% 100%`;
+    let lastF = -1; const setF = (deg) => { const f = ((Math.round(deg / (360 / N)) % N) + N) % N; if (f !== lastF) { lastF = f; s.style.backgroundPosition = `${f / (N - 1) * 100}% 0`; } };
+    const endS = img.offsetWidth / (s.offsetWidth || 1) || .76;      // size the coin has when it sits in the reel
+    const S = window.LR_SFX; S && S.goldStart && S.goldStart(); const wh = S && S.goldWhoosh ? S.goldWhoosh() : null;
+    const FLY = 1750, H = 96, K = .86, BIG = 1.5;
+    const put = (a, y, sc) => { setF(a); s.style.transform = `translate3d(0,${(-y).toFixed(1)}px,0) scale(${sc.toFixed(3)})`;
+      const k = 1 - Math.min(1, y / H) * .6; sh.style.transform = `scale(${(k * sc).toFixed(3)})`; sh.style.opacity = k.toFixed(2); };
+    // at the top: light rays open up behind it, a shine sweeps over the coin, little star twinkles around it
+    const rays = document.createElement("i"); rays.className = "gfx-rays"; box.insertBefore(rays, s);
+    const flipPeak = () => {
+      shine.animate([{ backgroundPosition: "-120% 0", opacity: 1 }, { backgroundPosition: "220% 0", opacity: 1 }], { duration: 560, easing: "cubic-bezier(.4,0,.2,1)" });
+      S && S.shine && S.shine();
+      rg.animate([{ opacity: 0, backgroundPosition: "-60% 0" }, { opacity: 1, backgroundPosition: "40% 0", offset: .4 }, { opacity: 1, backgroundPosition: "110% 0", offset: .7 }, { opacity: 0, backgroundPosition: "170% 0" }], { duration: 760, easing: "ease-in-out", fill: "forwards" });
+      for (let i = 0; i < 7; i++) { const st = document.createElement("i"); st.className = "gfx-star"; box.appendChild(st);
+        const ang = (i / 7) * 6.283 + Math.random() * .5, r = 62 + Math.random() * 28, sz = 8 + Math.random() * 9;
+        st.style.cssText = `width:${sz}px;height:${sz}px;left:calc(50% + ${Math.cos(ang) * r}px - ${sz / 2}px);top:calc(50% - 82px + ${Math.sin(ang) * r * .8}px - ${sz / 2}px)`;
+        st.animate([{ opacity: 0, transform: "scale(0) rotate(0deg)" }, { opacity: 1, transform: "scale(1.2) rotate(45deg)", offset: .35 }, { opacity: 0, transform: "scale(.2) rotate(90deg)" }], { duration: 700, delay: i * 55, easing: "ease-out", fill: "both" }).onfinish = () => st.remove(); }
+    };
+    const ringFx = () => { const rg = document.createElement("i"); rg.className = "gfx-ring"; box.appendChild(rg);
+      rg.animate([{ opacity: .9, transform: "scale(.4)" }, { opacity: 0, transform: "scale(1.7)" }], { duration: 520, easing: "cubic-bezier(.2,.7,.3,1)" }).onfinish = () => rg.remove(); };
+    return new Promise(res => {
+      const t0 = performance.now(); let last = 0, tick1 = false, peak = false;
+      (function f(t) { const ms = t - t0, u = Math.min(1, ms / FLY);
+        // one flip: fast up, slow-mo at the top, speeds up and drops straight into the slot (no bounce)
+        const a = 360 * (u + K * Math.sin(2 * Math.PI * u) / (2 * Math.PI)), y = H * Math.pow(Math.sin(Math.PI * u), .55);
+        const grow = ease.io(Math.min(1, u / .25)), shrink = Math.pow(Math.max(0, (u - .5) / .5), 1.6);
+        const sc = 1 + (BIG - 1) * grow + (endS - BIG) * shrink;
+        if (!tick1 && a >= 180) { tick1 = true; S && S.goldTick && S.goldTick(.5); }
+        if (!peak && u >= .42) { peak = true; flipPeak(); }
+        wh && wh.set(Math.min(1, Math.abs(a - last) / 14)); last = a; put(a, y, sc);
+        rg.style.transform = `scaleY(${Math.abs(Math.cos(a * Math.PI / 180)).toFixed(3)})`;
+        if (u < 1) return requestAnimationFrame(f);
+        put(0, 0, endS); wh && wh.stop();
+        // settle: soft squash, thud, shine, burst
+        s.animate([{ transform: `scale(${endS * 1.06},${endS * .95})` }, { transform: `scale(${endS})` }], { duration: 220, easing: "cubic-bezier(.2,.9,.3,1)", fill: "forwards" });
+        ringFx();
+        S && S.goldLand && S.goldLand(); setTimeout(() => S && S.shine && S.shine(), 120);
+        shine.animate([{ backgroundPosition: "-120% 0", opacity: 1 }, { backgroundPosition: "220% 0", opacity: 1 }], { duration: 650, easing: "cubic-bezier(.4,0,.2,1)" });
+        burst(R.el, "#ffc94d", 22); shake(R.el.parentElement, 6);
+        setTimeout(() => { img.style.transition = "opacity .14s"; img.style.opacity = ""; s.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: "forwards" });
+          setTimeout(() => { sh.remove(); s.remove(); rays.remove(); img.style.transition = ""; d.style.zIndex = ""; res(); }, 150); }, 750);
       })(t0);
     });
   }
@@ -796,9 +852,9 @@
   const FX_KEY = "lr_bonus_fx";
   (() => { const q = new URLSearchParams(location.search).get("fx"); if (q === "swords" || q === "gold") try { localStorage.setItem(FX_KEY, q); } catch (e) {} })();
   const bonusFx = () => { try { return localStorage.getItem(FX_KEY) || "gold"; } catch (e) { return "gold"; } };
-  const bonusPop = (R) => bonusFx() === "swords" ? clashPop(R) : stockingPop(R);
+  const bonusPop = (R) => bonusFx() === "swords" ? clashPop(R) : (flipSprite.complete && flipSprite.naturalWidth ? flipPop(R) : stockingPop(R));
   // the bonus tile on the reel follows the switch: gold coin or crossed swords
-  const fxTile = () => { const sw = bonusFx() === "swords"; STOCK.ref = { src: sw ? "img/swords_item.png" : "img/coin3d.png?v=4" }; STOCK.n = sw ? "Sword Clash" : "Gold Spin"; };
+  const fxTile = () => { const sw = bonusFx() === "swords"; STOCK.ref = { src: sw ? "img/swords_item.png" : "img/coin3d.png?v=5" }; STOCK.n = sw ? "Sword Clash" : "Gold Spin"; };
   fxTile(); new Image().src = "img/swords_item.png";
   function clashPop(R) {
     const d = R && R.pool.find(p => p._i === TGT); if (!d) return sleep(10);
@@ -1236,33 +1292,26 @@
   }
   addEventListener("pointerdown", init, { once: true, capture: true }); addEventListener("keydown", init, { once: true, capture: true });
   const on = () => ctx && !muted;
+  // NO BEEPS: anything pitched (200 Hz and up) is played as a soft airy noise tap instead of a tone.
+  // Only deep sine thuds (below 200 Hz) stay as real tones.
   function tone(freq, dur, { type = "sine", vol = .2, to = null, delay = 0, attack = .003 } = {}) {
+    if (Math.max(freq, to || 0) >= 200) return noise({ freq: Math.min(freq, 6000), to: to ? Math.min(to, 6000) : null, q: 1.2, dur: Math.min(dur, .12), vol: vol * .7, delay, attack: Math.min(attack, .05) });
+    type = "sine";
     if (!on()) return; const t = ctx.currentTime + delay, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.setValueAtTime(freq, t); if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
     o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + .03);
   }
   function noise({ freq = 3000, to = null, q = 1, dur = .02, vol = .3, delay = 0, type = "bandpass", attack = .001 } = {}) {
+    if (q > 4) { vol *= Math.sqrt(4 / q) ; q = 4; }   // narrow noise rings like a beep: keep it airy
     if (!on()) return; const t = ctx.currentTime + delay, src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
     src.buffer = nbuf; f.type = type; f.Q.value = q; f.frequency.setValueAtTime(freq, t); if (to) f.frequency.exponentialRampToValueAtTime(to, t + dur);
     g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
     src.connect(f); f.connect(g); g.connect(master); src.loop = dur > 2.3; src.start(t, Math.max(0, Math.random() * (2.5 - dur - .1))); src.stop(t + dur + .03);
   }
   // a small crowd going "awww": detuned voices through vowel formants, pitch sliding down
-  function aww() {
-    if (!on()) return; const t = ctx.currentTime, out = ctx.createGain(); out.gain.value = .9; out.connect(master);
-    const f1 = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter(); f1.type = f2.type = "bandpass";
-    f1.frequency.setValueAtTime(820, t); f1.frequency.linearRampToValueAtTime(600, t + 1.1); f1.Q.value = 6;
-    f2.frequency.setValueAtTime(1250, t); f2.frequency.linearRampToValueAtTime(950, t + 1.1); f2.Q.value = 8;
-    f1.connect(out); f2.connect(out);
-    for (let v = 0; v < 7; v++) {
-      const o = ctx.createOscillator(), g = ctx.createGain(), st = t + v * .03 + Math.random() * .05, p = (v < 4 ? 260 : 170) * (1 + (Math.random() - .5) * .08);
-      o.type = "sawtooth"; o.frequency.setValueAtTime(p * 1.12, st); o.frequency.exponentialRampToValueAtTime(p, st + .25); o.frequency.exponentialRampToValueAtTime(p * .72, st + 1.2);
-      const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 5 + Math.random() * 2; lg.gain.value = p * .015; lfo.connect(lg); lg.connect(o.frequency); lfo.start(st); lfo.stop(st + 1.4);
-      g.gain.setValueAtTime(.0001, st); g.gain.linearRampToValueAtTime(.09, st + .12); g.gain.setValueAtTime(.09, st + .55); g.gain.exponentialRampToValueAtTime(.0001, st + 1.3);
-      o.connect(g); g.connect(f1); g.connect(f2); o.start(st); o.stop(st + 1.35);
-    }
-    noise({ freq: 1000, q: .8, dur: 1, vol: .04, attack: .15 });
+  function aww() {   // losing: a soft downward whoosh, no voices or tones
+    noise({ freq: 1800, to: 350, q: 1, dur: .7, vol: .07, attack: .06 }); tone(120, .5, { vol: .12, to: 60 });
   }
   // plain soft click: tiny filtered tap + a short low body, no pitch sweep
   const wet = (hi = 1, v = 1) => { noise({ freq: 1700 * hi, q: 1.6, dur: .012, vol: .28 * v }); tone(210 * hi, .03, { vol: .12 * v, type: "triangle" }); };
@@ -1273,10 +1322,11 @@
     pop: () => wet(.8, .8),
     msg: () => noise({ freq: 4200, q: 6, dur: .01, vol: .05 }),
     coin: () => { [0, .05, .11, .16].forEach((d, i) => { noise({ freq: 5200 + i * 600 + Math.random() * 400, q: 14, dur: .09, vol: .28, delay: d }); tone(3100 + i * 260, .05, { vol: .025, delay: d }); }); },
-    tick: () => { noise({ freq: 2300 + Math.random() * 300, q: 3.5, dur: .012, vol: .45 }); tone(1500, .014, { vol: .045, to: 600 }); },
-    land: () => { tone(300, .13, { vol: .34, to: 85 }); noise({ freq: 900, type: "lowpass", dur: .07, vol: .25 }); },
-    rare: () => { tone(95, .55, { vol: .55, to: 38 }); noise({ freq: 5000, to: 250, type: "lowpass", dur: .45, vol: .32 }); noise({ freq: 3200, q: 2, dur: .04, vol: .3 });
-      for (let i = 0; i < 9; i++) noise({ freq: 6500 + Math.random() * 3000, q: 10, dur: .05, vol: .12, delay: .15 + i * .07 + Math.random() * .04 }); },
+    tick: () => { noise({ freq: 3200 + Math.random() * 400, q: 6, dur: .008, vol: .16 }); tone(1900, .012, { vol: .015, to: 1200 }); },   // soft reel click
+    land: () => { tone(560, .09, { vol: .1, to: 470, type: "triangle" }); noise({ freq: 2600, q: 4, dur: .014, vol: .06 }); },   // clean "tok" when a reel stops
+    rare: () => {   // bright shimmer for a rare pull - no boom
+      tone(880, .5, { vol: .045, type: "sine" }); tone(1320, .6, { vol: .035, type: "sine", delay: .07 }); noise({ freq: 2000, to: 7000, q: 1.2, dur: .45, vol: .04, attack: .08 });
+      for (let k = 0; k < 4; k++) noise({ freq: 4200 + Math.random() * 2500, q: 9, dur: .04, vol: .03, delay: .1 + k * .08 }); },
     // countdown: a riser swells under 3-2-1, each number is a harder thump, then a big drop
     riser: (ms = 2000) => { const d = ms / 1000; noise({ freq: 300, to: 6500, q: 1.4, dur: d, vol: .16, attack: d * .92 }); tone(110, d, { vol: .07, to: 330, attack: d * .9, type: "sawtooth" }); },
     count: (n) => { const p = { 3: 1, 2: 1.25, 1: 1.6 }[n] || 1; tone(170 * p, .2, { vol: .5, to: 60 * p }); noise({ freq: 2200 * p, q: 2, dur: .03, vol: .25 }); },
