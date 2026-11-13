@@ -26,6 +26,8 @@
     cart: '<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.5 12h11L21 7H6.2"/>',
     bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>', home: '<path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/>',
+    shield: '<path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/>',
+    cards: '<rect x="3" y="5" width="11" height="15" rx="2"/><path d="M9 4.2 10.5 3l9 2.6a2 2 0 0 1 1.4 2.5L17.5 19"/>',
     swords: '<path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6M16 16l4 4M14.5 6.5 18 3h3v3l-3.5 3.5M5 14l4 4M7 17l-3 3"/>',
     box: '<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>', up: '<path d="M12 4 4 13h5v7h6v-7h5z"/>',
     gem: '<path d="M7 3h10l5 6-10 12L2 9z"/><path d="M2 9h20"/>', tower: '<path d="M5 21V8l3-3 3 3V4h2v4l3-3 3 3v13z"/><path d="M10 21v-5h4v5"/>',
@@ -94,6 +96,7 @@
     { n: "Upgrader", i: "up", live: 1, gl: "rgba(255,255,255,.14)", gi: "#ffffff" },
     { n: "Mines", i: "gem", live: 1, gl: "rgba(120,140,255,.28)" },
     { n: "Tower", i: "tower", live: 1, tag: "NEW", gl: "rgba(47,125,255,.26)" },
+    { n: "Blackjack", i: "cards", live: 1, tag: "NEW", go: "blackjack", gl: "rgba(61,139,255,.26)" },
     { n: "Chicken", i: "chicken", live: 1, tag: "NEW", gl: "rgba(255,201,77,.18)", gi: "#ffc94d" },
     { n: "Coming Soon", i: "lock", soon: 1, tag: "NEW" },
   ];
@@ -339,7 +342,7 @@
   ];
   const VOL = 1.35;   // volatility: must match server.js
   CASES.forEach(c => { const its = c.items.split(" ").map(key => RBX.find(x => x.k === key)), w = c.odds ? c.odds.split(" ").map(Number) : its.map(x => Math.pow(x.v, -VOL)), S = w.reduce((a, x) => a + x, 0);
-    c.p = Math.round(its.reduce((a, x, i) => a + x.v * w[i] / S, 0) / .92); c.it = RBX.indexOf(its[its.length - 1]); c.max = its[its.length - 1].v; });
+    c.p = Math.round(its.reduce((a, x, i) => a + x.v * w[i] / S, 0) / .90); c.it = RBX.indexOf(its[its.length - 1]); c.max = its[its.length - 1].v; });
   $("#hl").innerHTML = [hbHTML(), hbHTML(), hbHTML()].join(""); $$("#hl .deal").forEach(el => io.observe(el));
   const MODS = {
     jackpot: { i: "crown", c: "#ffc94d", t: "Jackpot: win chance = share of the pot" },
@@ -577,7 +580,7 @@
     const w = c.odds ? c.odds.split(" ").map(Number) : its.map(x => Math.pow(x.v, -VOL)), S = w.reduce((a, x) => a + x, 0);
     return poolCache[k] = its.map((x, i) => ({ n: x.n, ref: x, v: x.v, t: tierOf(x.v), ch: +(100 * w[i] / S).toFixed(3) }));
   }
-  const STOCK = { n: "Gold Spin", ref: { src: "img/coin3d.png" }, v: 0, t: 3, ch: 0, stock: 1 };
+  const STOCK = { n: "Gold Spin", ref: { src: "img/coin3d.png?v=4" }, v: 0, t: 3, ch: 0, stock: 1 };
   const ADM = { bonus: !!window.LR_FORCE_BONUS, win: false };
   const bonusChance = () => ADM.bonus ? 1 : 1 / 25;
   function rollBonus(k) { const p = topHalf(casePool(k)), w = p.map((_, i) => 100 * Math.pow(.5, i + 1)); let x = Math.random() * 100; for (let i = 0; i < p.length; i++) { x -= w[i]; if (x <= 0) return p[i]; } return p[0]; }
@@ -624,7 +627,7 @@
       for (let k = 0; k < this.pool.length; k++) {
         const d = this.pool[k], i = f + k;
         if (i >= LEN) { d.style.visibility = "hidden"; d._i = -2; continue; }
-        if (d._i !== i) { const it = this.items[i]; d._img.src = it.ref.src; d.dataset.t = it.t; d.style.visibility = ""; d._i = i; }
+        if (d._i !== i) { const it = this.items[i]; d._img.src = it.ref.src; d.dataset.t = it.t; d.dataset.s = it.stock ? 1 : 0; d.style.visibility = ""; d._i = i; }
         const y = this.C - SLOT / 2 + (s - i * SLOT), fc = Math.max(0, 1 - Math.abs(y + SLOT / 2 - this.C) / (SLOT * 1.05)), sc = .74 + .4 * fc * fc;
         d.style.transform = `translate3d(0,${y.toFixed(1)}px,0) scale(${sc.toFixed(3)})`;
       }
@@ -751,7 +754,7 @@
       if (p <= t1) { const q = (p - t0) / (t1 - t0), w = e === "in" ? q * q : e === "lin" ? q : e === "out" ? 1 - Math.pow(1 - q, 3) : .5 - .5 * Math.cos(Math.PI * q); return a0 + (a1 - a0) * w; } }
     return 2520;
   }
-  const coinSprite = new Image(); coinSprite.src = "img/coin_spin.png"; coinSprite.decode && coinSprite.decode().catch(() => {});
+  const coinSprite = new Image(); coinSprite.src = "img/coin_spin.png?v=4"; coinSprite.decode && coinSprite.decode().catch(() => {});
   function stockingPop(R) {
     const d = R && R.pool.find(p => p._i === TGT); if (!d) return sleep(10);
     const box = d.querySelector(".vi-in"), img = box.querySelector("img"); img.style.opacity = 0;
@@ -759,6 +762,12 @@
     const sh = document.createElement("i"); sh.className = "c3d-shadow"; box.appendChild(sh);
     const s = document.createElement("i"); s.className = "c3d"; box.appendChild(s);
     const shine = document.createElement("i"); shine.className = "c3d-shine"; s.appendChild(shine);
+    // gold swirl: one tilted ring, back half behind the coin, front half in front
+    const arc = (k) => { const el = document.createElement("i"); el.className = "gsw gsw-" + k;
+      el.innerHTML = `<svg viewBox="0 0 200 80"><defs><linearGradient id="gswg" x1="0" x2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".5" stop-color="#ffc23d"/><stop offset="1" stop-color="#ff9d1a"/></linearGradient></defs><ellipse cx="100" cy="40" rx="92" ry="26" pathLength="100" fill="none" stroke="url(#gswg)" stroke-width="5" stroke-linecap="round" stroke-dasharray="34 66"/></svg>`;
+      box.appendChild(el); el.querySelector("ellipse").animate([{ strokeDashoffset: 100 }, { strokeDashoffset: -160 }], { duration: 2300, easing: "cubic-bezier(.3,.6,.4,1)", fill: "forwards" });
+      el.animate([{ opacity: 0, transform: "rotate(-24deg) scale(.7)" }, { opacity: 1, transform: "rotate(-24deg) scale(1)", offset: .15 }, { opacity: 1, transform: "rotate(-24deg) scale(1.02)", offset: .72 }, { opacity: 0, transform: "rotate(-24deg) scale(1.12)", offset: .86 }, { opacity: 0, transform: "rotate(-24deg) scale(1.12)" }], { duration: 2600, easing: "ease-in-out", fill: "forwards" }); return el; };
+    const sw = [];   // gold swirl switched off (arc() kept in case we want it back)
     let lastF = -1; const setF = (deg) => { const f = ((Math.round(deg / 10) % 36) + 36) % 36; if (f !== lastF) { lastF = f; s.style.backgroundPosition = `${f / 35 * 100}% 0`; } };
     R.el.classList.add("gold"); const S = window.LR_SFX; S && S.goldStart && S.goldStart(); const wh = S && S.goldWhoosh ? S.goldWhoosh() : null;
     const DUR = 2600;
@@ -779,7 +788,37 @@
         shine.animate([{ transform: "translateX(-130%) skewX(-20deg)", opacity: 1 }, { transform: "translateX(130%) skewX(-20deg)", opacity: 1 }], { duration: 650, easing: "cubic-bezier(.4,0,.2,1)" });
         burst(R.el, "#ffc94d", 22); shake(R.el.parentElement, 6);
         setTimeout(() => { const out = box.animate([{ transform: "scale(1.25)", opacity: 1 }, { transform: "scale(.5)", opacity: 0 }], { duration: 240, fill: "forwards" });
-          setTimeout(() => { glow.remove(); sh.remove(); s.remove(); box.getAnimations().forEach(an => an.cancel()); out.cancel(); img.style.opacity = ""; res(); }, 250); }, 900);
+          setTimeout(() => { glow.remove(); sh.remove(); s.remove(); sw.forEach(e => e.remove()); box.getAnimations().forEach(an => an.cancel()); out.cancel(); img.style.opacity = ""; res(); }, 250); }, 900);
+      })(t0);
+    });
+  }
+  // SWORDS CLASH: Blender-rendered sprite (img/clash_sheet.png, 40 frames, we play 9-40). Switch: admin panel, or ?fx=swords / ?fx=gold
+  const FX_KEY = "lr_bonus_fx";
+  (() => { const q = new URLSearchParams(location.search).get("fx"); if (q === "swords" || q === "gold") try { localStorage.setItem(FX_KEY, q); } catch (e) {} })();
+  const bonusFx = () => { try { return localStorage.getItem(FX_KEY) || "gold"; } catch (e) { return "gold"; } };
+  const bonusPop = (R) => bonusFx() === "swords" ? clashPop(R) : stockingPop(R);
+  // the bonus tile on the reel follows the switch: gold coin or crossed swords
+  const fxTile = () => { const sw = bonusFx() === "swords"; STOCK.ref = { src: sw ? "img/swords_item.png" : "img/coin3d.png?v=4" }; STOCK.n = sw ? "Sword Clash" : "Gold Spin"; };
+  fxTile(); new Image().src = "img/swords_item.png";
+  function clashPop(R) {
+    const d = R && R.pool.find(p => p._i === TGT); if (!d) return sleep(10);
+    const box = d.querySelector(".vi-in"), img = box.querySelector("img"); img.style.opacity = 0;
+    const glow = document.createElement("i"); glow.className = "clash-glow"; box.appendChild(glow);
+    const s = document.createElement("i"); s.className = "clash"; box.appendChild(s);
+    const F0 = 8, F1 = 39, FPS = 30, HIT = 11, DUR = (F1 - F0 + 1) / FPS * 1000 + 700;   // frame index 11 = impact (frame 12)
+    const setF = (f) => s.style.backgroundPosition = `${f / 39 * 100}% 0`;
+    setF(F0); R.el.classList.add("clash-on"); const S = window.LR_SFX; S && S.swordDraw && S.swordDraw();
+    return new Promise(res => {
+      box.animate([{ transform: "scale(1)" }, { transform: "translateY(-14px) scale(1.4)", offset: .12 }, { transform: "translateY(-14px) scale(1.45)", offset: .85 }, { transform: "translateY(0) scale(1.25)" }], { duration: DUR, easing: "cubic-bezier(.3,.7,.3,1)", fill: "forwards" });
+      glow.animate([{ opacity: 0 }, { opacity: .9, offset: .2 }, { opacity: .6 }], { duration: DUR, fill: "forwards" });
+      const t0 = performance.now(); let hit = false;
+      (function f(t) { const fr = Math.min(F1, F0 + Math.floor((t - t0) / 1000 * FPS)); setF(fr);
+        if (!hit && fr >= HIT) { hit = true; S && S.swordClash && S.swordClash(); burst(R.el, "#ffd27a", 26); shake(R.el.parentElement, 9);
+          glow.animate([{ transform: "scale(.6)", opacity: 1 }, { transform: "scale(1.35)", opacity: .6 }], { duration: 380, easing: "cubic-bezier(.2,.8,.3,1)" }); }
+        if (fr < F1) return requestAnimationFrame(f);
+        S && S.shine && S.shine();
+        setTimeout(() => { const out = box.animate([{ transform: "scale(1.25)", opacity: 1 }, { transform: "scale(.5)", opacity: 0 }], { duration: 240, fill: "forwards" });
+          setTimeout(() => { glow.remove(); s.remove(); R.el.classList.remove("clash-on"); box.getAnimations().forEach(an => an.cancel()); out.cancel(); img.style.opacity = ""; res(); }, 250); }, 700);
       })(t0);
     });
   }
@@ -890,7 +929,7 @@
         const r = b.round; drawHex();
         await spinRound(b, r); if (V.b !== b) return;
         const bon = b.players.map((_, i) => i).filter(i => b.bon && b.bon[i + "_" + r]);
-        if (bon.length) { await Promise.all(bon.map(i => stockingPop(V.reels[i]))); if (V.b !== b) return; await bonusSpin(b, r, bon); if (V.b !== b) return; }
+        if (bon.length) { await Promise.all(bon.map(i => bonusPop(V.reels[i]))); if (V.b !== b) return; await bonusSpin(b, r, bon); if (V.b !== b) return; }
         V.shown = r + 1; b.round = r + 1; b.unboxed = b.players.reduce((a, _, i) => a + tot(b, i, V.shown), 0);
         $$("#bvArena .sv").forEach(el => { const i = +el.dataset.seat, e = el.querySelector("[data-tot]"); if (e) { countUp(e, tot(b, i, V.shown), 700, tot(b, i, r)); e.parentElement.classList.remove("bump"); void e.offsetWidth; e.parentElement.classList.add("bump"); } });
         $$("#bvHist .hcol").forEach((col, i) => { const it = b.hist[i][r], c = col.children[r]; c.className = "hc fresh" + (b.bon && b.bon[i + "_" + r] ? " bon" : ""); c.style.setProperty("--tc", TIERC[it.t]);
@@ -964,11 +1003,90 @@
   addEventListener("keydown", (e) => { if (e.key === "Escape") caseModal.hidden = true; });
   document.addEventListener("click", (e) => { const t = e.target.closest("[data-case]"); if (!t || t.closest(".cm")) return; e.stopPropagation(); showCase(+t.dataset.case); }, true);
 
+  // =====================================================================
+  // BLACKJACK (#blackjack): server deals online, bj-core.js deals offline
+  // =====================================================================
+  const BJ = window.LR_BJ, SUIT = { s: "♠", h: "♥", d: "♦", c: "♣" };
+  let bjG = null, bjV = null, bjBusy = false;
+  const bjEl = { d: $("#bjDealer .bj-cards"), p: $("#bjPlayer .bj-cards"), ds: $("#bjDealer .bj-score"), ps: $("#bjPlayer .bj-score") };
+  const cardHTML = (c) => { if (!c) return `<span class="bj-card back"></span>`; const r = c.slice(0, -1), su = c.slice(-1), red = su === "h" || su === "d";
+    return `<span class="bj-card ${red ? "red" : ""}"><i class="cd-tl">${r}<em>${SUIT[su]}</em></i><strong class="cd-mid">${SUIT[su]}</strong><i class="cd-br">${r}<em>${SUIT[su]}</em></i></span>`; };
+  function dealIn(box, c, delay) {
+    box.insertAdjacentHTML("beforeend", cardHTML(c)); const el = box.lastElementChild, sh = $("#bjShoe").getBoundingClientRect(), r = el.getBoundingClientRect();
+    el.animate([{ transform: `translate(${sh.left - r.left}px,${sh.top - r.top}px) rotate(-16deg) scale(.9)`, opacity: .9 }, { transform: "none", opacity: 1 }], { duration: 380, delay, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" });
+    setTimeout(() => window.LR_SFX && LR_SFX.card && LR_SFX.card(), delay); return el;
+  }
+  const scoreTxt = (t) => t.soft && t.t < 21 ? `${t.t - 10}/${t.t}` : `${t.t}`;
+  // update a hand's number the moment its card lands, not after the whole deal
+  function bjScoreAt(w, cards, at) {
+    setTimeout(() => { const el = w === "p" ? bjEl.ps : bjEl.ds, t = BJ.total(cards.filter(Boolean)); el.hidden = false; el.textContent = scoreTxt(t);
+      if (w === "p") el.className = "bj-score" + (t.t > 21 ? " bust" : t.t === 21 ? " hot" : ""); }, at + 220);
+  }
+  // draw the new view, animating only the cards that weren't on the table yet
+  function bjDraw(v, fresh) {
+    if (fresh) { bjEl.d.innerHTML = ""; bjEl.p.innerHTML = ""; $(".bj-hand.player").className = "bj-hand player"; $(".bj-hand.dealer").className = "bj-hand dealer"; }
+    let d = 0; const step = 260;
+    const order = fresh ? [["p", 0], ["d", 0], ["p", 1], ["d", 1]] : [];
+    if (fresh) order.forEach(([w, i]) => { const h = w === "p" ? v.player : v.dealer, c = h[i]; if (i < h.length) { dealIn(bjEl[w], c, d); bjScoreAt(w, h.slice(0, i + 1), d); d += step; } });
+    else {
+      const ph = bjEl.p.children.length; for (let i = ph; i < v.player.length; i++) { dealIn(bjEl.p, v.player[i], d); bjScoreAt("p", v.player.slice(0, i + 1), d); d += step; }
+      const hole = bjEl.d.children[1]; if (v.done && hole && hole.classList.contains("back") && v.dealer[1]) { setTimeout(() => { hole.outerHTML = cardHTML(v.dealer[1]); const nh = bjEl.d.children[1]; nh.classList.add("flip"); window.LR_SFX && LR_SFX.card && LR_SFX.card(); }, d + 450); bjScoreAt("d", v.dealer.slice(0, 2), d + 450 - 200); d += 450 + 750; }
+      for (let i = Math.max(2, bjEl.d.children.length); i < v.dealer.length; i++) { dealIn(bjEl.d, v.dealer[i], d); bjScoreAt("d", v.dealer.slice(0, i + 1), d); d += 800; }   // dealer draws one card at a time
+    }
+    setTimeout(() => {
+      bjEl.ps.hidden = false; bjEl.ps.textContent = scoreTxt(v.pt); bjEl.ds.hidden = false; bjEl.ds.textContent = scoreTxt(v.dt);
+      bjEl.ps.className = "bj-score" + (v.pt.t > 21 ? " bust" : v.pt.t === 21 ? " hot" : "");
+      $("#bjActs").hidden = v.done; $("#bjGo").hidden = !v.done; $("#bjDouble").disabled = v.player.length !== 2 || LR.bal < v.bet;
+      if (v.done) {
+        const R2 = { blackjack: ["BLACKJACK!", "win"], win: ["YOU WIN", "win"], push: ["PUSH", "push"], lose: ["DEALER WINS", "lose"], bust: ["BUST", "lose"] }[v.result];
+        // winner's cards get a blue outline, loser's a red one, a push is white on both
+        const dr = R2[1] === "win" ? "lose" : R2[1] === "lose" ? "win" : "push";
+        $(".bj-hand.player").className = "bj-hand player " + R2[1]; $(".bj-hand.dealer").className = "bj-hand dealer " + dr;
+        $("#bjLast").textContent = v.payout > v.bet ? `Won ${fmt(v.payout - v.bet)}` : v.result === "push" ? "Push" : `Lost ${fmt(v.bet)}`;
+        $("#bjGo").textContent = "BET AGAIN";
+        if (window.LR_SFX) { if (R2[1] === "win") LR_SFX.win(); else if (R2[1] === "lose") LR_SFX.land(); }
+      }
+      bjBusy = false;
+    }, d + (v.done ? 650 : 380));
+  }
+  // clear last round off the table straight away when a new bet goes in
+  function bjClear() {
+    const cards = [...bjEl.d.children, ...bjEl.p.children];
+    $(".bj-hand.player").className = "bj-hand player"; $(".bj-hand.dealer").className = "bj-hand dealer";
+    bjEl.ps.hidden = bjEl.ds.hidden = true;
+    if (!cards.length) return Promise.resolve();
+    cards.forEach((c, i) => c.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-14px) scale(.92)" }], { duration: 200, delay: i * 15, fill: "forwards" }));
+    return sleep(230).then(() => { bjEl.d.innerHTML = ""; bjEl.p.innerHTML = ""; });
+  }
+  async function bjSend(a) {
+    if (bjBusy) return; const betIn = $("#bjBet"), bet = Math.round(parseFloat(betIn.value) * SHOW);
+    if (a === "start") { if (!bet || bet < 10) return toast(`${ic("clock")} Minimum bet is ${fmt(10)}`); if (bet > LR.bal) return toast(`${ic("clock")} Not enough balance`); }
+    bjBusy = true; let v;
+    if (a === "start") await bjClear();
+    if (NET.on) {
+      if (!window.LR_USER) { bjBusy = false; toast(`${ic("user")} Log in to play`); return LR_AUTH.open(); }
+      const r = await NET.req("bj", { a, bet }); if (r.err) { bjBusy = false; return toast(`${ic("clock")} ${r.err}`); } v = r.g;
+    } else {
+      if (a === "start") { LR.spend(bet); bjG = BJ.start(bet); }
+      else { if (a === "double") { if (LR.bal < bjG.bet) { bjBusy = false; return toast(`${ic("clock")} Not enough balance to double`); } }
+        const r = BJ.act(bjG, a); if (r.err) { bjBusy = false; return toast(`${ic("clock")} ${r.err}`); } if (r.extra) LR.spend(r.extra); }
+      v = BJ.view(bjG); if (v.done && v.payout) setTimeout(() => LR.addCoins(v.payout, $("#bjPlayer")), (a === "start" ? 1500 : 2000 + 800 * Math.max(0, v.dealer.length - 2)));
+    }
+    bjV = v; bjDraw(v, a === "start");
+  }
+  $("#bjGo").onclick = () => bjSend("start");
+  $("#bjHit").onclick = () => bjSend("hit"); $("#bjStand").onclick = () => bjSend("stand"); $("#bjDouble").onclick = () => bjSend("double");
+  $$(".bj-bet [data-bm]").forEach(b => b.onclick = () => { const i = $("#bjBet"), v = parseFloat(i.value) || 0, m = b.dataset.bm;
+    i.value = (m === "half" ? Math.max(5, v / 2) : m === "2x" ? v * 2 : LR.bal / SHOW).toFixed(2); });
+  // coming back to the page mid-hand (online): pick the hand back up
+  async function bjEnter() { if (!NET.on || bjV || !window.LR_USER) return; const r = await NET.req("bj", { a: "state" }); if (r.g && !r.g.done) { bjV = r.g; bjDraw(r.g, true); } }
+
   // ---------- routing ----------
   function route() {
     const h = location.hash.replace("#", ""), bm = h.match(/^battle-(\d+)$/);
-    $("#view-home").hidden = h === "battles" || h === "create" || !!bm; $("#view-battles").hidden = h !== "battles"; $("#view-create").hidden = h !== "create"; $("#view-battle").hidden = !bm;
-    $(".foot").hidden = h === "create" || !!bm;
+    $("#view-home").hidden = h === "battles" || h === "create" || h === "blackjack" || !!bm; $("#view-battles").hidden = h !== "battles"; $("#view-create").hidden = h !== "create"; $("#view-battle").hidden = !bm;
+    $("#view-blackjack").hidden = h !== "blackjack"; if (h === "blackjack") bjEnter();
+    $(".foot").hidden = h === "create" || h === "blackjack" || !!bm;
     if (bm) openView(+bm[1]); else closeView();
     $$("[data-nav]").forEach(a => a.classList.toggle("on", a.dataset.nav === h || (a.dataset.nav === "battles" && (h === "create" || h.startsWith("battle-")))));
     $("#main").scrollTop = 0; if (h === "battles") renderBattles();
@@ -987,14 +1105,19 @@
         <input id="admBal" type="number" min="0" step="0.01" placeholder="Set"><button data-a="set">Set</button></div>
         <div class="adm-r"><button data-a="add" data-v="10000">+5K</button><button data-a="add" data-v="100000">+50K</button><button data-a="add" data-v="1000000">+500K</button><button data-a="zero">Set 0</button></div></div>
       <div class="adm-s"><small>Battles</small>
-        <label class="adm-t"><input type="checkbox" data-a="bonus" ${ADM.bonus ? "checked" : ""}><i></i>Every pull is a Gold Spin</label>
+        <label class="adm-t"><input type="checkbox" data-a="bonus" ${ADM.bonus ? "checked" : ""}><i></i>Every pull is a bonus spin</label>
         <label class="adm-t"><input type="checkbox" data-a="win" ${ADM.win ? "checked" : ""}><i></i>I always win my battles</label>
+        <div class="adm-r adm-fx"><span>Bonus animation</span><button data-fx="gold">Gold Spin</button><button data-fx="swords">Swords</button></div>
         <div class="adm-r"><button data-a="spawn">Spawn 3 battles</button><button data-a="clear">Clear finished</button></div></div>
       <div class="adm-s"><small>Site</small><div class="adm-r"><button data-a="rain">Start rain now</button><button data-a="accounts">Wipe accounts</button></div></div>
       <p class="adm-n">Demo only. Once the site is online, admin has to live on the server, not in this file.</p></div>`;
     paint(adm);
   };
   window.LR_ADMIN = () => { admDraw(); adm.hidden = false; };
+  const fxMark = () => adm.querySelectorAll("[data-fx]").forEach(b => b.classList.toggle("on", b.dataset.fx === bonusFx()));
+  new MutationObserver(fxMark).observe(adm, { childList: true });
+  adm.addEventListener("click", (e) => { const b = e.target.closest("[data-fx]"); if (!b) return; e.stopImmediatePropagation();
+    try { localStorage.setItem(FX_KEY, b.dataset.fx); } catch (er) {} fxMark(); fxTile(); toast(`${ic("check")} Bonus animation: ${b.dataset.fx === "swords" ? "Swords" : "Gold Spin"}`); }, true);
   adm.addEventListener("click", (e) => {
     if (e.target === adm) return adm.hidden = true;
     const b = e.target.closest("[data-a]"); if (!b || b.tagName === "INPUT") return; const a = b.dataset.a;
@@ -1080,8 +1203,9 @@
         <input id="admV" type="number" step="0.01" placeholder="Amount" style="width:80px"><button data-n="add">Add</button><button data-n="set">Set</button></div>
         <div class="adm-r adm-ul">${r.users.map(x => `<span><b></b> <span class="coin sm"></span>${fmt(x.bal)}</span>`).join("")}</div></div>
       <div class="adm-s"><small>Cheats (only your battles)</small>
-        <label class="adm-t"><input type="checkbox" data-n="bonus"><i></i>Every pull is a Gold Spin</label>
-        <label class="adm-t"><input type="checkbox" data-n="win"><i></i>I always win my battles</label></div>
+        <label class="adm-t"><input type="checkbox" data-n="bonus"><i></i>Every pull is a bonus spin</label>
+        <label class="adm-t"><input type="checkbox" data-n="win"><i></i>I always win my battles</label>
+        <div class="adm-r adm-fx"><span>Bonus animation</span><button data-fx="gold">Gold Spin</button><button data-fx="swords">Swords</button></div></div>
       <div class="adm-s"><small>Site</small><div class="adm-r"><button data-n="rain">Start rain now</button><button data-n="clear">Clear finished battles</button></div></div></div>`;
     paint(adm); adm.querySelectorAll(".adm-ul b").forEach((el, k) => el.textContent = r.users[k].u); adm.hidden = false;
   };
@@ -1163,19 +1287,21 @@
         for (let i = 0; i < 18; i++) noise({ freq: 6000 + Math.random() * 4000, q: 10, dur: .06, vol: .14, delay: .05 + i * .065 + Math.random() * .05 }); }, 470); },
     lose: () => { aww(); },
     // GOLD SPIN: a launch hit, a whoosh that follows the coin's speed, metal "shing" pings, a big jackpot landing
-    goldStart: () => { tone(60, .7, { vol: .75, to: 30 }); noise({ freq: 300, to: 5000, q: .8, dur: .45, vol: .35, attack: .05 }); noise({ freq: 2600, q: 1.2, dur: .06, vol: .5 });
-      for (let i = 0; i < 5; i++) noise({ freq: 6000 + Math.random() * 3000, q: 25, dur: .04, vol: .18, delay: .04 + i * .05 }); },
+    goldStart: () => { tone(60, .6, { vol: 0.2, to: 30 }); noise({ freq: 300, to: 3000, q: .8, dur: .4, vol: 0.07, attack: .05 }); noise({ freq: 2000, q: 1.2, dur: .05, vol: 0.06 }); },
     goldWhoosh: () => { if (!on()) return null; const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
       src.buffer = nbuf; src.loop = true; f.type = "bandpass"; f.Q.value = 1.4; f.frequency.value = 400; g.gain.value = 0;
       src.connect(f); f.connect(g); g.connect(master); src.start();
-      return { set(speed) { const t = ctx.currentTime; f.frequency.setTargetAtTime(350 + speed * 2600, t, .03); g.gain.setTargetAtTime(Math.min(.55, speed * .6), t, .04); },
+      return { set(speed) { const t = ctx.currentTime; f.frequency.setTargetAtTime(300 + speed * 1500, t, .03); g.gain.setTargetAtTime(Math.min(.1, speed * .11), t, .04); },
         stop() { const t = ctx.currentTime; g.gain.setTargetAtTime(0, t, .06); src.stop(t + .4); } }; },
-    goldTick: (k = 1) => { const b = 2900 + Math.random() * 300; [1, 2.76, 5.4].forEach((m, i) => tone(b * m / 2, .07 + .05 * k, { vol: (.11 - i * .03) * k, type: "sine" })); noise({ freq: 6000, q: 3, dur: .012, vol: .25 * k }); },
+    goldTick: (k = 1) => { const b = 2900 + Math.random() * 300; [1, 2.76, 5.4].forEach((m, i) => tone(b * m / 3, .07 + .05 * k, { vol: (.025 - i * .007) * k, type: "sine" })); noise({ freq: 3500, q: 3, dur: .012, vol: 0.03 * k }); },
     // landing: no musical notes - a heavy thud, a crash, then a shower of real-sounding coin clinks
-    goldLand: () => { tone(70, .28, { vol: .85, to: 38 }); noise({ freq: 900, type: "lowpass", dur: .18, vol: .7 }); noise({ freq: 7000, to: 1500, type: "lowpass", dur: .5, vol: .32, delay: .02 });
-      const clink = (d, v) => { const f = 4200 + Math.random() * 3800; noise({ freq: f, q: 28, dur: .05, vol: v, delay: d }); noise({ freq: f * 1.47, q: 30, dur: .035, vol: v * .6, delay: d + .004 }); };
-      for (let i = 0; i < 22; i++) clink(.08 + i * .05 + Math.random() * .04, .34 * (1 - i / 30)); },
-    shine: () => { noise({ freq: 1500, to: 9000, q: 1.5, dur: .42, vol: .2, attack: .22 }); },
+    goldLand: () => { tone(70, .28, { vol: 0.28, to: 38 }); noise({ freq: 900, type: "lowpass", dur: .18, vol: 0.18 }); noise({ freq: 4000, to: 1200, type: "lowpass", dur: .4, vol: 0.05, delay: .02 });
+      const clink = (d, v) => { const f = 2600 + Math.random() * 1600; noise({ freq: f, q: 14, dur: .04, vol: v, delay: d }); };
+      for (let i = 0; i < 7; i++) clink(.08 + i * .07 + Math.random() * .04, .06 * (1 - i / 9)); },
+    swordDraw: () => { noise({ freq: 1200, to: 6000, q: 1.4, dur: .32, vol: 0.099, attack: .25 }); tone(2400, .3, { vol: 0.013, to: 3600, attack: .25, type: "triangle" }); },
+    swordClash: () => { noise({ freq: 5000, q: .8, dur: .05, vol: 0.27 }); tone(60, .4, { vol: 0.315, to: 30 }); noise({ freq: 1200, type: "lowpass", dur: .14, vol: 0.225 });
+      [1870, 2523, 3311, 4417, 5890].forEach((f, i) => tone(f, 1.4 - i * .18, { vol: 0.032 - i * .008, type: i % 2 ? "triangle" : "sine", to: f * .995 })); },
+    shine: () => { noise({ freq: 1500, to: 5000, q: 1.5, dur: .4, vol: 0.035, attack: .22 }); },
     thud: () => { tone(240, .7, { vol: .22, to: 70 }); noise({ freq: 1200, to: 150, type: "lowpass", dur: .5, vol: .18 }); },
   };
   // a different sound for each battle mode
@@ -1185,6 +1311,7 @@
     else if (m === "terminal") { tone(140, .35, { vol: .35, to: 60, type: "sawtooth" }); noise({ freq: 600, type: "lowpass", dur: .2, vol: .3 }); }
     else if (m === "underdog") { tone(700, .22, { vol: .2, to: 260, type: "square" }); tone(350, .18, { vol: .12, to: 180, delay: .12 }); }
   };
+  SFX.card = () => { noise({ freq: 2600, to: 900, q: 1.2, dur: .09, vol: .32 }); noise({ freq: 5200, q: 4, dur: .02, vol: .12, delay: .07 }); };
   window.LR_SFX = SFX;
 
   // click sounds only (no hover sounds)
