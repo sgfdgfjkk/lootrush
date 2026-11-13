@@ -563,6 +563,26 @@
   // BATTLE VIEWER (#battle-ID): big vertical reels, real Roblox items, bait stops
   // =====================================================================
   const TIERC = ["#9aa1ac", "#5aa2ff", "#a78bfa", "#f472b6", "#ffc94d", "#ff5468"];
+  // background ripple: when a reel lands, the arena's honeycomb lights up in a ring that runs out from that reel.
+  // Bigger pull = bigger, brighter ripple in that rarity's colour. Grid matches .bv-arena::before exactly.
+  const HEXR = 22, HEXW = 3 * HEXR, HEXH = Math.sqrt(3) * HEXR, hexURLs = {};
+  function hexURL(col) {
+    if (hexURLs[col]) return hexURLs[col];
+    const hp = (cx, cy) => "M" + [0, 60, 120, 180, 240, 300].map(a => `${(cx + HEXR * Math.cos(a * Math.PI / 180)).toFixed(2)} ${(cy + HEXR * Math.sin(a * Math.PI / 180)).toFixed(2)}`).join(" L") + "Z";
+    const d = [[HEXR, HEXH / 2], [2.5 * HEXR, 0], [2.5 * HEXR, HEXH], [-.5 * HEXR, 0], [-.5 * HEXR, HEXH]].map(c => hp(...c)).join(" ");
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${HEXW.toFixed(2)}' height='${HEXH.toFixed(2)}' viewBox='0 0 ${HEXW.toFixed(2)} ${HEXH.toFixed(2)}'><path d='${d}' fill='none' stroke='${col}' stroke-width='1.8' stroke-linejoin='round'/></svg>`;
+    return hexURLs[col] = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  }
+  const RIP = [[260, .3], [340, .45], [460, .6], [620, .78], [820, .95], [900, 1]];   // by tier: [reach px, brightness]
+  function arenaRipple(reelEl, tier) {
+    const ar = reelEl && reelEl.closest(".bv-arena"); if (!ar) return;
+    const gold = tier === "gold", [reach, op] = gold ? [980, 1] : RIP[Math.max(0, Math.min(5, tier | 0))], col = gold ? "#ffcf5a" : tier <= 0 ? "#ffffff" : TIERC[tier];
+    const a = ar.getBoundingClientRect(), r = reelEl.getBoundingClientRect();
+    const el = document.createElement("i"); el.className = "bv-rip";
+    el.style.cssText = `--cx:${(r.left + r.width / 2 - a.left + ar.scrollLeft).toFixed(0)}px;--cy:${(r.top + r.height / 2 - a.top).toFixed(0)}px;background-image:${hexURL(col)};background-size:${HEXW.toFixed(2)}px ${HEXH.toFixed(2)}px;filter:drop-shadow(0 0 5px ${col})`;
+    ar.insertBefore(el, ar.firstChild);
+    el.animate([{ "--rr": "0px", opacity: op }, { opacity: op * .9, offset: .7 }, { "--rr": reach + "px", opacity: 0 }], { duration: 900 + reach * 1.3, easing: "cubic-bezier(.3,.5,.4,1)", fill: "forwards" }).onfinish = () => el.remove();
+  }
   const MULT = [.15, .3, .5, .8, 1.3, 2.6, 6, 15], WGT = [30, 24, 18, 12, 8, 5, 2.4, .6], TIER = [0, 0, 1, 1, 2, 3, 4, 5];
   // resolve every Roblox image once: keep the CDN link if it loads, else our drawn fallback
   RBX.forEach(it => it.src = it.u);
@@ -839,7 +859,6 @@
         put(0, 0, endS); wh && wh.stop();
         // settle: soft squash, thud, shine, burst
         s.animate([{ transform: `scale(${endS * 1.06},${endS * .95})` }, { transform: `scale(${endS})` }], { duration: 220, easing: "cubic-bezier(.2,.9,.3,1)", fill: "forwards" });
-        ringFx();
         S && S.goldLand && S.goldLand(); setTimeout(() => S && S.shine && S.shine(), 120);
         shine.animate([{ backgroundPosition: "-120% 0", opacity: 1 }, { backgroundPosition: "220% 0", opacity: 1 }], { duration: 650, easing: "cubic-bezier(.4,0,.2,1)" });
         burst(R.el, "#ffc94d", 22); shake(R.el.parentElement, 6);
