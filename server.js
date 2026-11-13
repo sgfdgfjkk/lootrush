@@ -2,6 +2,8 @@
 // Play money only. Run: npm install && npm start   (Render: build "npm install", start "npm start")
 const http = require("http"), fs = require("fs"), path = require("path"), crypto = require("crypto");
 const { WebSocketServer } = require("ws");
+const BJ = require("./bj-core.js");
+const bjGames = new Map();   // username -> current blackjack hand
 
 const PORT = process.env.PORT || 3000;
 const ROOT = __dirname;
@@ -33,7 +35,7 @@ const CASE_ITEMS = ["pal visor tb lav charm bun kitty horns", "visor lav charm b
 const ODDS = { 9: "50 30 14.5 5 0.5", 10: "55 25 12 5 2 1", 11: "50 30 15 3 1.5 0.5", 12: "60 25 10 3.5 1 0.5", 13: "70 20 7 2.5 0.5", 14: "50 30 12 5 2 0.7 0.25 0.05", 15: "60 35 5", 16: "80 15 4 1" };
 const VOL = 1.35;   // higher = more volatile (cheap items more common, top items rarer)
 const POOLS = CASE_ITEMS.map((s, ci) => { const its = s.split(" ").map(k => V[k]), w = ODDS[ci] ? ODDS[ci].split(" ").map(Number) : its.map(v => Math.pow(v, -VOL)), S = w.reduce((a, c) => a + c, 0); return its.map((v, i) => ({ v, ch: w[i] / S * 100, w: w[i], S })); });
-const PRICE = POOLS.map(p => Math.round(p.reduce((a, x) => a + x.v * x.w / x.S, 0) / .92));   // same maths as app.js
+const PRICE = POOLS.map(p => Math.round(p.reduce((a, x) => a + x.v * x.w / x.S, 0) / .90));   // 10% house edge, same maths as app.js
 const BOTS = ["BaconHairBandit", "NoobSlayer9000", "Sir_Lags_Alot", "OofMaster", "RobuxBeggar", "GrandmaGamer", "CertifiedNoob", "Sweaty_Tryhard", "LagWizard", "DadOfTheYear", "BuilderGuy404", "ChunkyMilk", "BruhMoment", "UnpaidIntern", "TouchGrassPls", "TaxEvader3000", "Guest_1337", "WiFiBandit", "SpicyNugget", "ClumsyKnight", "MomSaidNo", "PizzaRat", "SnackGoblin", "TrashPanda", "HappyFlop"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const rollIdx = (k) => { let x = Math.random() * 100; const p = POOLS[k]; for (let i = 0; i < p.length; i++) { x -= p[i].ch; if (x <= 0) return i; } return 0; };
@@ -188,6 +190,26 @@ const handlers = {
   bot(ws, m) { const b = battles.get(+m.id); if (b && ws.user === b.owner) fillBot(b, +m.seat); },
   bots(ws, m) { const b = battles.get(+m.id); if (!b || ws.user !== b.owner) return; b.players.forEach((p, i) => { if (!p) setTimeout(() => fillBot(b, i), 350 + i * 380); }); },
   rain(ws) { if (!ws.user) return send(ws, { t: "err", msg: "Log in to join the rain" }); rain.joined.add(ws.user); send(ws, { t: "rain", pot: rain.pot, end: rain.end, joined: true }); },
+  bj(ws, m, rid) {
+    const u = ws.user && userOf(ws.user); if (!u) return send(ws, { t: "res", rid, err: "Log in to play" });
+    let g = bjGames.get(u.u);
+    if (m.a === "state") return send(ws, { t: "res", rid, g: BJ.view(g) });
+    if (m.a === "start") {
+      if (g && !g.done) return send(ws, { t: "res", rid, g: BJ.view(g) });
+      const bet = Math.round(+m.bet || 0);
+      if (!(bet >= 10)) return send(ws, { t: "res", rid, err: "Minimum bet is 5.00" });
+      if (bet > u.bal) return send(ws, { t: "res", rid, err: "Not enough balance" });
+      u.bal -= bet; u.wag = (u.wag || 0) + bet; g = BJ.start(bet); bjGames.set(u.u, g);
+    } else {
+      if (!g || g.done) return send(ws, { t: "res", rid, err: "No hand in play" });
+      if (m.a === "double" && g.bet > u.bal) return send(ws, { t: "res", rid, err: "Not enough balance to double" });
+      const r = BJ.act(g, m.a); if (r.err) return send(ws, { t: "res", rid, err: r.err });
+      if (r.extra) { u.bal -= r.extra; u.wag += r.extra; }
+    }
+    const win = g.done ? g.payout : 0; if (win) u.bal += win; save();
+    send(ws, { t: "res", rid, g: BJ.view(g) });
+    if (win) setTimeout(() => pushMe(u, win), 2000 + 800 * Math.max(0, g.dealer.length - 2)); else pushMe(u);   // pay out once the dealer has finished drawing on screen
+  },
   admin(ws, m, rid) {
     const u = ws.user && userOf(ws.user);
     if (!u || !ADMINS.includes(u.u.toLowerCase())) return send(ws, { t: "res", rid, err: "Not an admin" });
@@ -204,7 +226,7 @@ const handlers = {
 
 // ---------------------------------------------------------------- http + websocket
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".svg": "image/svg+xml", ".mp4": "video/mp4", ".webm": "video/webm", ".gif": "image/gif", ".ico": "image/x-icon", ".json": "application/json" };
-const BLOCK = /^\/(data|node_modules|\.|server\.js|package|old\/|_render)/i;
+const BLOCK = /^\/(data|node_modules|\.|server\.js|package|old\/|_render)/i;   // bj-core.js is public on purpose (the site uses it offline)
 const server = http.createServer((req, res) => {
   if (!gateOk(req)) { res.writeHead(401, { "www-authenticate": 'Basic realm="LootRush (password needed)"', "content-type": "text/plain" }); return res.end("LootRush is in password mode."); }
   let p = decodeURIComponent(req.url.split("?")[0]);
