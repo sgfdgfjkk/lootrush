@@ -40,7 +40,7 @@ const goodIdx = (ch) => { const g = ch.map((c, i) => c < 10 ? i : -1).filter(i =
 const GOOD = POOLS.map(p => goodIdx(p.map(x => x.ch)));
 const PRICE = POOLS.map((p, k) => { const ev = p.reduce((a, x) => a + x.v * x.w / x.S, 0), g = GOOD[k], bw = g.map((_, j) => Math.pow(.5, j + 1)), BS = bw.reduce((a, x) => a + x, 0);
   const evB = g.reduce((a, gi, j) => a + p[gi].v * bw[j] / BS, 0); return Math.round((ev * 24 / 25 + evB / 25) / .90); });   // 10% house edge incl. the 1-in-25 gold spin, same maths as app.js
-const BOTS = ["BaconHairBandit", "NoobSlayer9000", "Sir_Lags_Alot", "OofMaster", "RobuxBeggar", "GrandmaGamer", "CertifiedNoob", "Sweaty_Tryhard", "LagWizard", "DadOfTheYear", "BuilderGuy404", "ChunkyMilk", "BruhMoment", "UnpaidIntern", "TouchGrassPls", "TaxEvader3000", "Guest_1337", "WiFiBandit", "SpicyNugget", "ClumsyKnight", "MomSaidNo", "PizzaRat", "SnackGoblin", "TrashPanda", "HappyFlop"];
+const BOTS = ["Babyalien", "Downyluck", "Elonmusk", "Jamal", "Saint", "Speed", ];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const rollIdx = (k) => { let x = Math.random() * 100; const p = POOLS[k]; for (let i = 0; i < p.length; i++) { x -= p[i].ch; if (x <= 0) return i; } return 0; };
 const rollBonus = (k) => { const g = GOOD[k], w = g.map((_, j) => Math.pow(.5, j + 1)), S = w.reduce((a, c) => a + c, 0); let x = Math.random() * S; for (let j = 0; j < g.length; j++) { x -= w[j]; if (x <= 0) return g[j]; } return g[g.length - 1]; };
