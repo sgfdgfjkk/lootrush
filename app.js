@@ -345,6 +345,7 @@
   $("#chatShow").addEventListener("click", () => $(".layout").classList.remove("no-chat"));
 
   // ---------- coin rain ----------
+  const RAIN_ON = false;   // rain is switched off for now: the box shows, but joining and payouts do nothing
   let rain = ri(800, 1600), rainEnd = Date.now() + ri(90, 240) * 1000, joined = false;
   const rainBtn = $("#rainJoin");
   function rainTick() {
@@ -352,8 +353,8 @@
     if (s <= 0 && NET.on) s = 0;
     else if (s <= 0) {
       const players = ri(18, 60), share = rain / players;
-      msg("LootRush", `Rain paid ${fmt(rain)} coins to ${players} players!`, "sys");
-      if (joined) { addCoins(share, rainBtn); toast(`<span class="coin"></span> Rain gave you +${fmt(share)} play coins`); }
+      if (RAIN_ON) msg("LootRush", `Rain paid ${fmt(rain)} coins to ${players} players!`, "sys");
+      if (RAIN_ON && joined) { addCoins(share, rainBtn); toast(`<span class="coin"></span> Rain gave you +${fmt(share)} play coins`); }
       rain = ri(800, 1600); rainEnd = Date.now() + 300000; joined = false; rainBtn.disabled = false; rainBtn.classList.remove("joined"); rainBtn.textContent = "Join Rain"; s = 300;
     }
     $("#rainT").textContent = `${two(Math.floor(s / 60))}:${two(s % 60)}`;
@@ -361,7 +362,7 @@
   }
   rainTick(); setInterval(rainTick, 1000);
   const rainSet = (o) => { rain = o.pot; rainEnd = o.end + NET.skew; if (o.joined !== undefined) { joined = o.joined; rainBtn.classList.toggle("joined", joined); rainBtn.innerHTML = joined ? `${ic("check")}Joined` : "Join Rain"; } rainTick(); };
-  rainBtn.addEventListener("click", () => { if (NET.on) { if (!window.LR_USER) return LR_AUTH.open(); if (!joined) NET.send({ t: "rain" }); return; } if (joined) return; joined = true; rainBtn.classList.add("joined"); rainBtn.innerHTML = `${ic("check")}Joined`; toast(`${ic("check")} You're in the rain`); });
+  rainBtn.addEventListener("click", () => { if (!RAIN_ON) return; if (NET.on) { if (!window.LR_USER) return LR_AUTH.open(); if (!joined) NET.send({ t: "rain" }); return; } if (joined) return; joined = true; rainBtn.classList.add("joined"); rainBtn.innerHTML = `${ic("check")}Joined`; toast(`${ic("check")} You're in the rain`); });
 
   // ---------- entrance: deal cards in as they scroll into view ----------
   const io = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { const el = e.target, k = [...el.parentElement.children].indexOf(el); setTimeout(() => el.classList.add("in"), k * 60); io.unobserve(el); } }), { root: $("#main"), threshold: .15 });
@@ -386,7 +387,9 @@
   ];
   const VOL = 1.35;   // volatility: must match server.js
   CASES.forEach(c => { const its = c.items.split(" ").map(key => RBX.find(x => x.k === key)), w = c.odds ? c.odds.split(" ").map(Number) : its.map(x => Math.pow(x.v, -VOL)), S = w.reduce((a, x) => a + x, 0);
-    c.p = Math.round(its.reduce((a, x, i) => a + x.v * w[i] / S, 0) / .90); c.it = RBX.indexOf(its[its.length - 1]); c.max = its[its.length - 1].v; });
+    const ev = its.reduce((a, x, i) => a + x.v * w[i] / S, 0), g = goodIdx(w.map(x => 100 * x / S)), bw = g.map((_, j) => Math.pow(.5, j + 1)), BS = bw.reduce((a, x) => a + x, 0);
+    const evB = g.reduce((a, gi, j) => a + its[gi].v * bw[j] / BS, 0);
+    c.p = Math.round((ev * 24 / 25 + evB / 25) / .90); c.it = RBX.indexOf(its[its.length - 1]); c.max = its[its.length - 1].v; });
   $("#hl").innerHTML = [hbHTML(), hbHTML(), hbHTML()].join(""); $$("#hl .deal").forEach(el => io.observe(el));
   const MODS = {
     jackpot: { i: "crown", c: "#ffc94d", t: "Jackpot: win chance = share of the pot" },
@@ -658,7 +661,10 @@
   const STOCK = { n: "Gold Spin", ref: { src: "img/coin3d.png?v=5" }, v: 0, t: 3, ch: 0, stock: 1 };
   const ADM = { bonus: !!window.LR_FORCE_BONUS, win: false };
   const bonusChance = () => ADM.bonus ? 1 : 1 / 25;
-  function rollBonus(k) { const p = topHalf(casePool(k)), w = p.map((_, i) => 100 * Math.pow(.5, i + 1)); let x = Math.random() * 100; for (let i = 0; i < p.length; i++) { x -= w[i]; if (x <= 0) return p[i]; } return p[0]; }
+  // gold spin only uses the case's rare items: under 10% normal chance (at least the top 2). Same rule as server.js
+  function goodIdx(ch) { const g = ch.map((c, i) => c < 10 ? i : -1).filter(i => i >= 0); return g.length >= 2 ? g : [ch.length - 2, ch.length - 1]; }
+  const goodPool = (p) => goodIdx(p.map(x => x.ch)).map(i => p[i]);
+  function rollBonus(k) { const p = goodPool(casePool(k)), w = p.map((_, i) => Math.pow(.5, i + 1)), S = w.reduce((a, x) => a + x, 0); let x = Math.random() * S; for (let i = 0; i < p.length; i++) { x -= w[i]; if (x <= 0) return p[i]; } return p[p.length - 1]; }
   function rollItem(k) { let x = Math.random() * 100; const p = casePool(k); for (const it of p) { x -= it.ch; if (x <= 0) return it; } return p[0]; }
   const modeOf = (b) => ["jackpot", "terminal", "underdog"].find(m => b.mods.includes(m)) || "classic";
   const MODE_NAME = { classic: "Classic", jackpot: "Jackpot", terminal: "Terminal", underdog: "Underdog" };
@@ -954,7 +960,7 @@
   }
   function bonusSpin(b, r, seats) {
     const base = b.mods.includes("fast") ? 2800 : 4600, list = [];
-    seats.forEach(i => { const R = V.reels[i]; if (!R) return; const top = topHalf(casePool(b.cs[r]));
+    seats.forEach(i => { const R = V.reels[i]; if (!R) return; const top = goodPool(casePool(b.cs[r]));
       R.build(b.cs[r], b.hist[i][r]); for (let k = 0; k < LEN; k++) if (k !== TGT) R.items[k] = pick(top); R.el.classList.remove("gold"); R.el.classList.add("bonus"); R.s = 3 * SLOT; R.plan(base); list.push({ R, it: b.hist[i][r], el: R.el.parentElement }); });
     return new Promise(done => { let t0 = null, last = 0, left = list.length; if (!left) return done();
       (function frame(now) { if (V.b !== b) return done(); if (t0 === null) t0 = now; const t = now - t0;
@@ -1361,7 +1367,9 @@
   function init() {
     if (ctx) return; const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     ctx = new AC(); comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.connect(ctx.destination);
-    master = ctx.createGain(); master.gain.value = muted ? 0 : .55; master.connect(comp);
+    master = ctx.createGain(); master.gain.value = muted ? 0 : .55;
+    const warm = ctx.createBiquadFilter(); warm.type = "lowpass"; warm.frequency.value = 7000; warm.Q.value = .5;   // takes the harsh treble off every sound
+    master.connect(warm); warm.connect(comp);
     nbuf = ctx.createBuffer(1, ctx.sampleRate * 2.5, ctx.sampleRate); const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   }
   addEventListener("pointerdown", init, { once: true, capture: true }); addEventListener("keydown", init, { once: true, capture: true });
@@ -1369,7 +1377,7 @@
   // NO BEEPS: anything pitched (200 Hz and up) is played as a soft airy noise tap instead of a tone.
   // Only deep sine thuds (below 200 Hz) stay as real tones.
   function tone(freq, dur, { type = "sine", vol = .2, to = null, delay = 0, attack = .003 } = {}) {
-    if (Math.max(freq, to || 0) >= 200) return noise({ freq: Math.min(freq, 6000), to: to ? Math.min(to, 6000) : null, q: 1.2, dur: Math.min(dur, .12), vol: vol * .7, delay, attack: Math.min(attack, .05) });
+    if (Math.max(freq, to || 0) >= 200) return noise({ type: "lowpass", freq: Math.min(freq * .6, 1600), to: to ? Math.min(to * .6, 1600) : null, q: .9, dur: Math.min(dur, .1), vol: vol * .8, delay, attack: Math.max(.004, Math.min(attack, .05)) });   // soft rounded knock, not a hiss
     type = "sine";
     if (!on()) return; const t = ctx.currentTime + delay, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.setValueAtTime(freq, t); if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
@@ -1377,7 +1385,8 @@
     o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + .03);
   }
   function noise({ freq = 3000, to = null, q = 1, dur = .02, vol = .3, delay = 0, type = "bandpass", attack = .001 } = {}) {
-    if (q > 4) { vol *= Math.sqrt(4 / q) ; q = 4; }   // narrow noise rings like a beep: keep it airy
+    const qMax = dur <= .08 ? 8 : 3; if (q > qMax) { vol *= Math.sqrt(qMax / q); q = qMax; }   // short = crisp chink, long = airy, never a ringing beep
+    if (freq > 4200) { vol *= Math.sqrt(4200 / freq); freq = 4200; } if (to && to > 4200) to = 4200;   // keep sparkles out of the piercing range   // narrow noise rings like a beep: keep it airy
     if (!on()) return; const t = ctx.currentTime + delay, src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
     src.buffer = nbuf; f.type = type; f.Q.value = q; f.frequency.setValueAtTime(freq, t); if (to) f.frequency.exponentialRampToValueAtTime(to, t + dur);
     g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
@@ -1390,25 +1399,27 @@
   // plain soft click: tiny filtered tap + a short low body, no pitch sweep
   const wet = (hi = 1, v = 1) => { noise({ freq: 1700 * hi, q: 1.6, dur: .012, vol: .28 * v }); tone(210 * hi, .03, { vol: .12 * v, type: "triangle" }); };
   const SFX = {
-    click: () => wet(1, 1),
-    tab: () => wet(1.35, .7),
-    add: () => { wet(1.15, 1); noise({ freq: 2600, q: 2, dur: .01, vol: .14, delay: .045 }); },
-    pop: () => wet(.8, .8),
-    msg: () => noise({ freq: 4200, q: 6, dur: .01, vol: .05 }),
-    coin: () => { [0, .05, .11, .16].forEach((d, i) => { noise({ freq: 5200 + i * 600 + Math.random() * 400, q: 14, dur: .09, vol: .28, delay: d }); tone(3100 + i * 260, .05, { vol: .025, delay: d }); }); },
-    tick: () => { noise({ freq: 3200 + Math.random() * 400, q: 6, dur: .008, vol: .16 }); tone(1900, .012, { vol: .015, to: 1200 }); },   // soft reel click
-    land: () => { tone(560, .09, { vol: .1, to: 470, type: "triangle" }); noise({ freq: 2600, q: 4, dur: .014, vol: .06 }); },   // clean "tok" when a reel stops
-    rare: () => {   // bright shimmer for a rare pull - no boom
-      tone(880, .5, { vol: .045, type: "sine" }); tone(1320, .6, { vol: .035, type: "sine", delay: .07 }); noise({ freq: 2000, to: 7000, q: 1.2, dur: .45, vol: .04, attack: .08 });
-      for (let k = 0; k < 4; k++) noise({ freq: 4200 + Math.random() * 2500, q: 9, dur: .04, vol: .03, delay: .1 + k * .08 }); },
+    click: () => { noise({ freq: 2400, q: 2, dur: .012, vol: .2 }); tone(180, .04, { vol: .14, to: 110 }); },   // crisp "tk" with a little weight
+    tab: () => { noise({ freq: 3000, q: 2, dur: .01, vol: .14 }); tone(190, .03, { vol: .08, to: 140 }); },
+    add: () => { noise({ freq: 2400, q: 2, dur: .012, vol: .18 }); tone(170, .04, { vol: .12, to: 110 }); noise({ freq: 3200, q: 3, dur: .012, vol: .16, delay: .055 }); tone(150, .06, { vol: .14, to: 90, delay: .055 }); },
+    pop: () => { tone(190, .09, { vol: .16, to: 120 }); noise({ freq: 1800, type: "lowpass", dur: .04, vol: .08 }); },
+    msg: () => noise({ freq: 3000, q: 3, dur: .01, vol: .08 }),
+    coin: () => { tone(150, .05, { vol: .1, to: 110 }); [0, .045, .1, .15].forEach((d, i) => noise({ freq: 3100 + i * 280 + Math.random() * 300, q: 8, dur: .05, vol: .14 - i * .02, delay: d })); },   // little cascade of coin chinks
+    tick: () => { noise({ freq: 2600 + Math.random() * 300, q: 3, dur: .01, vol: .22 }); tone(150, .025, { vol: .1, to: 100 }); },   // ratchet click
+    land: () => { tone(120, .2, { vol: .38, to: 60 }); noise({ freq: 1500, type: "lowpass", dur: .07, vol: .22 }); noise({ freq: 3000, q: 2, dur: .012, vol: .12 }); },   // solid "thunk"
+    rare: () => {   // quick rising whoosh into a deep impact, then a sparkle
+      noise({ freq: 500, to: 3500, q: 1.5, dur: .3, vol: .12, attack: .25 });
+      tone(90, .55, { vol: .55, to: 40, delay: .28 }); noise({ freq: 3000, to: 300, type: "lowpass", dur: .45, vol: .28, delay: .28 }); noise({ freq: 2600, q: 2, dur: .02, vol: .2, delay: .28 });
+      for (let k = 0; k < 7; k++) noise({ freq: 3200 + Math.random() * 1000, q: 8, dur: .06, vol: .06, delay: .32 + k * .06 + Math.random() * .03 }); },
     // countdown: a riser swells under 3-2-1, each number is a harder thump, then a big drop
     riser: (ms = 2000) => { const d = ms / 1000; noise({ freq: 300, to: 6500, q: 1.4, dur: d, vol: .16, attack: d * .92 }); tone(110, d, { vol: .07, to: 330, attack: d * .9, type: "sawtooth" }); },
-    count: (n) => { const p = { 3: 1, 2: 1.25, 1: 1.6 }[n] || 1; tone(170 * p, .2, { vol: .5, to: 60 * p }); noise({ freq: 2200 * p, q: 2, dur: .03, vol: .25 }); },
+    count: (n) => { const p = { 3: 1, 2: 1.15, 1: 1.3 }[n] || 1; tone(140 * p, .22, { vol: .5, to: 55 * p }); noise({ freq: 2200 * p, q: 2, dur: .03, vol: .25 }); noise({ freq: 900, type: "lowpass", dur: .08, vol: .18 }); },
     go: () => { tone(80, .8, { vol: .65, to: 32 }); noise({ freq: 7000, to: 180, type: "lowpass", dur: .6, vol: .4 }); noise({ freq: 3000, q: 1.5, dur: .05, vol: .35 }); },
     join: () => { noise({ freq: 700, to: 2600, q: 1.2, dur: .12, vol: .08, attack: .1 }); wet(1, .9); },
-    win: () => { noise({ freq: 400, to: 7000, q: 1.2, dur: .5, vol: .2, attack: .45 }); tone(220, .5, { vol: .08, to: 880, attack: .45, type: "triangle" });
-      setTimeout(() => { tone(70, .9, { vol: .6, to: 30 }); noise({ freq: 8000, to: 300, type: "lowpass", dur: .7, vol: .38 });
-        for (let i = 0; i < 18; i++) noise({ freq: 6000 + Math.random() * 4000, q: 10, dur: .06, vol: .14, delay: .05 + i * .065 + Math.random() * .05 }); }, 470); },
+    win: () => {   // big rising whoosh, heavy impact, then a shower of coin sparkle
+      noise({ freq: 400, to: 4000, q: 1.2, dur: .5, vol: .2, attack: .45 });
+      setTimeout(() => { tone(70, .9, { vol: .6, to: 30 }); noise({ freq: 5000, to: 300, type: "lowpass", dur: .7, vol: .38 }); noise({ freq: 2600, q: 2, dur: .03, vol: .25 });
+        for (let i = 0; i < 16; i++) noise({ freq: 3000 + Math.random() * 1200, q: 8, dur: .06, vol: .08, delay: .05 + i * .065 + Math.random() * .05 }); }, 470); },
     lose: () => { aww(); },
     // GOLD SPIN: a launch hit, a whoosh that follows the coin's speed, metal "shing" pings, a big jackpot landing
     goldStart: () => { tone(60, .6, { vol: 0.2, to: 30 }); noise({ freq: 300, to: 3000, q: .8, dur: .4, vol: 0.07, attack: .05 }); noise({ freq: 2000, q: 1.2, dur: .05, vol: 0.06 }); },
