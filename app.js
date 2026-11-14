@@ -25,6 +25,8 @@
     gift: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
     cart: '<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.5 12h11L21 7H6.2"/>',
     bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+    trash: '<path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10 11v5.5M14 11v5.5"/>',
+    bellok: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/><path d="m9.5 10.5 1.8 1.8 3.4-3.6"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>', home: '<path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/>',
     shield: '<path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/>',
     cards: '<rect x="3" y="5" width="11" height="15" rx="2"/><path d="M9 4.2 10.5 3l9 2.6a2 2 0 0 1 1.4 2.5L17.5 19"/>',
@@ -52,7 +54,38 @@
   const paint = (root = document) => root.querySelectorAll("[data-i]").forEach(e => { const n = e.getAttribute("data-i"); if (n && I[n] && !e.firstChild) e.innerHTML = `<svg viewBox="0 0 24 24">${I[n]}</svg>`; });
 
   // ---------- toast + balance ----------
-  let tt; const toast = (h) => { const t = $("#toast"); t.innerHTML = h; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 2200); };
+  // ---------- notifications: nothing pops up on screen, everything goes in the bell ----------
+  const esc = (x) => String(x).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const NF_KEY = "lr_notifs";
+  let notifs = []; try { notifs = JSON.parse(localStorage.getItem(NF_KEY)) || []; } catch (e) {}
+  const nfSave = () => { try { localStorage.setItem(NF_KEY, JSON.stringify(notifs.slice(0, 40))); } catch (e) {} };
+  const nfTitle = (h) => { const t = h.replace(/<[^>]+>/g, " ").toLowerCase();
+    if (/rain/.test(t)) return "Rain claimed"; if (/tipped/.test(t)) return "Tip sent"; if (/log in/.test(t)) return "Log in needed";
+    if (/not enough|you need/.test(t)) return "Not enough balance"; if (/minimum/.test(t)) return "Bet too low"; if (/next update|coming/.test(t)) return "Coming soon";
+    if (/free coins/.test(t)) return "Free coins"; if (/welcome/.test(t)) return "Welcome"; if (/admin|gold spin|always win|bonus animation|done/.test(t)) return "Admin";
+    if (/data-i[^>]*>.*check|M5 12l5 5/.test(h)) return "Done"; return "Notification"; };
+  const nfMsg = (h) => h.replace(/^\s*<i data-i><svg[\s\S]*?<\/svg><\/i>\s*/, "")   // drop the leading icon
+    .replace(/(<span class="coin[^"]*"><\/span>)\s*([\d.,]+)/g, '<b class="nf-amt">$1$2</b>');   // coin amounts stand out
+  const toast = (h, title) => {
+    const now = Date.now(), msg = nfMsg(h), top = notifs[0];
+    if (top && top.msg === msg && now - top.ts < 10 * 60000) { top.ts = now; top.read = false; }   // same thing again: bump it, don't stack copies
+    else notifs.unshift({ id: now + "" + Math.random().toString(36).slice(2, 6), title: title || nfTitle(h), msg, ts: now, read: false });
+    notifs = notifs.slice(0, 40); nfSave(); nfDraw();
+    const b = $("#bell"); if (b && !nfOpen) { b.classList.remove("ring"); void b.offsetWidth; b.classList.add("ring"); window.LR_SFX && LR_SFX.pop && LR_SFX.pop(); }
+  };
+  let nfOpen = false;
+  const nfTime = (ts) => { const d = new Date(ts), t = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); return d.toDateString() === new Date().toDateString() ? t : d.toLocaleDateString([], { month: "short", day: "numeric" }) + ", " + t; };
+  function nfDraw() {
+    const unread = notifs.filter(n => !n.read).length, b = $("#bell"); if (!b) return;
+    let dot = b.querySelector(".dot"); if (!dot) { dot = document.createElement("b"); dot.className = "dot"; b.appendChild(dot); }
+    dot.textContent = unread > 9 ? "9+" : unread || ""; dot.hidden = !unread;
+    const pop = $("#nfPop"); if (!pop) return;
+    pop.querySelector(".nf-sub").textContent = unread ? `${unread} new notification${unread > 1 ? "s" : ""}` : "No new notifications";
+    const list = pop.querySelector(".nf-list");
+    list.innerHTML = notifs.length ? notifs.map(n => `<div class="nf-it ${n.read ? "" : "new"}" data-id="${n.id}"><div class="nf-top"><b>${esc(n.title)}</b><small>${nfTime(n.ts)}</small></div><div class="nf-row"><p>${n.msg}</p><button class="nf-del" data-del="${n.id}" title="Delete">${ic("trash")}</button></div></div>`).join("")
+      : `<div class="nf-empty">${ic("bell")}<span>You're all caught up</span></div>`;
+  }
+
   let bal = 2500; try { bal = NET.on ? 0 : parseFloat(localStorage.getItem("lr2_balance")) || 2500; } catch (e) {}
   let shown = 0;
   const countTo = (v, ms = 700) => { const f = shown, t0 = performance.now(); (function s(t) { const k = Math.min(1, (t - t0) / ms); shown = f + (v - f) * (1 - (1 - k) ** 3); $("#bal").textContent = fmt(shown); if (k < 1) requestAnimationFrame(s); })(t0); };
@@ -79,7 +112,18 @@
     if (w > 0) return toast(`${ic("clock")} Free coins again in ${Math.ceil(w / 1000)}s`);
     last = Date.now(); const n = ri(25, 100) * 10; addCoins(n, e.currentTarget); toast(`<span class="coin"></span> +${fmt(n)} play coins`);
   });
-  $("#bell").addEventListener("click", (e) => { const b = e.currentTarget; b.classList.remove("ring"); void b.offsetWidth; b.classList.add("ring"); b.querySelector(".dot")?.remove(); toast(`${ic("bell")} Welcome to the LootRush demo!`); });
+  { const bell = $("#bell"), pop = document.createElement("div"); pop.className = "nf-pop"; pop.id = "nfPop"; pop.hidden = true;
+    pop.innerHTML = `<div class="nf-h">${ic("bell")}<div><b>Notifications</b><small class="nf-sub"></small></div><button class="nf-hb" data-nf="read" title="Mark all as read">${ic("bellok")}</button><button class="nf-hb" data-nf="clear" title="Clear all">${ic("trash")}</button></div><div class="nf-list"></div>`;
+    bell.parentElement.style.position = "relative"; bell.parentElement.appendChild(pop);
+    const markRead = () => { notifs.forEach(n => n.read = true); nfSave(); };
+    const setOpen = (o) => { nfOpen = o; pop.hidden = !o; bell.classList.toggle("on", o); if (o) { nfDraw(); setTimeout(() => { markRead(); const d = bell.querySelector(".dot"); if (d) d.hidden = true; pop.querySelector(".nf-sub").textContent = "No new notifications"; }, 1200); } else nfDraw(); };
+    bell.addEventListener("click", (e) => { e.stopPropagation(); setOpen(!nfOpen); });
+    pop.addEventListener("click", (e) => { e.stopPropagation(); const del = e.target.closest("[data-del]"), act = e.target.closest("[data-nf]");
+      if (del) { notifs = notifs.filter(n => n.id !== del.dataset.del); nfSave(); nfDraw(); }
+      else if (act && act.dataset.nf === "read") { markRead(); nfDraw(); }
+      else if (act && act.dataset.nf === "clear") { notifs = []; nfSave(); nfDraw(); } });
+    document.addEventListener("click", () => nfOpen && setOpen(false)); addEventListener("keydown", (e) => { if (e.key === "Escape" && nfOpen) setOpen(false); });
+    nfDraw(); }
   $$(".wc-name").forEach(e => e.textContent = ME); $(".hb-me").title = window.LR_USER ? ME + " · Level 13" : "Log in";
   $(".hb-me").addEventListener("click", (e) => { e.stopImmediatePropagation(); window.LR_AUTH && LR_AUTH.open(); }, true);
   if (!window.LR_USER) { const b = document.createElement("button"); b.className = "btn blue hb-login"; b.textContent = "Log In"; b.onclick = () => LR_AUTH.open(); $(".hb-me").before(b); }
@@ -275,9 +319,9 @@
       if (v > LR.bal) return err.textContent = "You don't have that much";
       if (NET.on) { const go = tipM.querySelector(".tip-go"); go.disabled = true;
         return NET.req("tip", { to: name, amount: v }).then(r => { go.disabled = false; if (r.err) return err.textContent = r.err;
-          tipM.hidden = true; toast(`${ic("check")} You tipped <b></b> <span class="coin sm"></span>${fmt(v)}`); $("#toast b").textContent = name; window.LR_SFX && LR_SFX.coin && LR_SFX.coin(); }); }
+          tipM.hidden = true; toast(`${ic("check")} You tipped <b>${esc(name)}</b> <span class="coin sm"></span>${fmt(v)}`); window.LR_SFX && LR_SFX.coin && LR_SFX.coin(); }); }
       LR.spend(v, false); tipped += v; try { localStorage.setItem("lr2_tipped_" + new Date().toDateString(), tipped); } catch (e) {}
-      tipM.hidden = true; toast(`${ic("check")} You tipped <b></b> <span class="coin sm"></span>${fmt(v)}`); $("#toast b").textContent = name;
+      tipM.hidden = true; toast(`${ic("check")} You tipped <b>${esc(name)}</b> <span class="coin sm"></span>${fmt(v)}`);
       msg("LootRush", `${ME} tipped @${name} ${fmt(v)}`, "sys"); window.LR_SFX && LR_SFX.coin && LR_SFX.coin();
       setTimeout(() => msg(name, pick(["tysm!!", "omg thank you", "W tipper", "ty " + ME, "yooo thanks"])), rand(900, 2200));
     };
@@ -563,6 +607,14 @@
   // BATTLE VIEWER (#battle-ID): big vertical reels, real Roblox items, bait stops
   // =====================================================================
   const TIERC = ["#9aa1ac", "#5aa2ff", "#a78bfa", "#f472b6", "#ffc94d", "#ff5468"];
+  // the blue side arrows act like a prize-wheel ticker: every item that passes the middle flicks them down, then they spring back
+  let arAnims = [];
+  function arrowTick(v) {
+    const amp = Math.min(24, 7 + v * .9), dur = Math.max(70, Math.min(170, 260 - v * 9));
+    arAnims.forEach(a => a.cancel());
+    arAnims = [...document.querySelectorAll("#bvArena .bv-ar")].map(el => { const k = el.classList.contains("l") ? 1 : -1;
+      return el.animate([{ transform: "rotate(0deg)" }, { transform: `rotate(${k * amp}deg)`, offset: .28 }, { transform: `rotate(${-k * amp * .18}deg)`, offset: .7 }, { transform: "rotate(0deg)" }], { duration: dur, easing: "ease-out" }); });
+  }
   // background ripple: when a reel lands, the arena's honeycomb lights up in a ring that runs out from that reel.
   // Bigger pull = bigger, brighter ripple in that rarity's colour. Grid matches .bv-arena::before exactly.
   const HEXR = 22, HEXW = 3 * HEXR, HEXH = Math.sqrt(3) * HEXR, hexURLs = {};
@@ -574,12 +626,15 @@
     return hexURLs[col] = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
   }
   const RIP = [[260, .3], [340, .45], [460, .6], [620, .78], [820, .95], [900, 1]];   // by tier: [reach px, brightness]
-  function arenaRipple(reelEl, tier) {
+  function arenaRipple(reelEl, tier, clipEl) {
     const ar = reelEl && reelEl.closest(".bv-arena"); if (!ar) return;
-    const gold = tier === "gold", [reach, op] = gold ? [980, 1] : RIP[Math.max(0, Math.min(5, tier | 0))], col = gold ? "#ffcf5a" : tier <= 0 ? "#ffffff" : TIERC[tier];
+    const white = tier === "white", gold = tier === "gold";
+    const [reach, op] = white ? [560, .9] : gold ? [980, 1] : RIP[Math.max(0, Math.min(5, tier | 0))], col = white ? "#ffffff" : gold ? "#ffcf5a" : tier <= 0 ? "#ffffff" : TIERC[tier];
     const a = ar.getBoundingClientRect(), r = reelEl.getBoundingClientRect();
     const el = document.createElement("i"); el.className = "bv-rip";
     el.style.cssText = `--cx:${(r.left + r.width / 2 - a.left + ar.scrollLeft).toFixed(0)}px;--cy:${(r.top + r.height / 2 - a.top).toFixed(0)}px;background-image:${hexURL(col)};background-size:${HEXW.toFixed(2)}px ${HEXH.toFixed(2)}px;filter:drop-shadow(0 0 5px ${col})`;
+    if (clipEl) { const c = clipEl.getBoundingClientRect();   // keep the ripple inside that player's reel column
+      el.style.clipPath = `inset(${Math.max(0, c.top - a.top).toFixed(0)}px ${Math.max(0, a.right - c.right).toFixed(0)}px ${Math.max(0, a.bottom - c.bottom).toFixed(0)}px ${Math.max(0, c.left - a.left).toFixed(0)}px)`; }
     ar.insertBefore(el, ar.firstChild);
     el.animate([{ "--rr": "0px", opacity: op }, { opacity: op * .9, offset: .7 }, { "--rr": reach + "px", opacity: 0 }], { duration: 900 + reach * 1.3, easing: "cubic-bezier(.3,.5,.4,1)", fill: "forwards" }).onfinish = () => el.remove();
   }
@@ -760,7 +815,7 @@
         if (V.b !== b) return done(); if (t0 === null) t0 = now; const t = now - t0;
         for (const x of list) { if (x.R.landed) continue;
           const s = x.R.at(Math.min(t, x.R.total)), v = Math.abs(s - x.R.s); x.R.s = s;
-          if (x.R.render(s, t >= x.R.total ? 0 : v) && x === lead && now - last > 30) { last = now; window.LR_SFX && LR_SFX.tick && LR_SFX.tick(); }
+          if (x.R.render(s, t >= x.R.total ? 0 : v) && x === lead && now - last > 30) { last = now; arrowTick(v); window.LR_SFX && LR_SFX.tick && LR_SFX.tick(); }
           if (t >= x.R.total && x.it.stock) { x.R.landed = true; x.R.el.classList.add("landed"); left--; const d = x.R.pool.find(p => p._i === TGT); if (d) d.className = "vi win"; continue; }
           if (t >= x.R.total) { const rare = x.it.t >= 3; x.R.land(x.it, rare); left--; shake(x.el, rare ? 7 : 2);
             if (rare) { burst(x.R.el, TIERC[x.it.t], 24); window.LR_SFX && LR_SFX.rare && LR_SFX.rare(); } else if (x === lead || !left) window.LR_SFX && LR_SFX.land && LR_SFX.land(); } }
@@ -904,8 +959,8 @@
     return new Promise(done => { let t0 = null, last = 0, left = list.length; if (!left) return done();
       (function frame(now) { if (V.b !== b) return done(); if (t0 === null) t0 = now; const t = now - t0;
         for (const x of list) { if (x.R.landed) continue; const s = x.R.at(Math.min(t, x.R.total)), v = Math.abs(s - x.R.s); x.R.s = s;
-          if (x.R.render(s, t >= x.R.total ? 0 : v) && now - last > 30) { last = now; window.LR_SFX && LR_SFX.tick(); }
-          if (t >= x.R.total) { x.R.land(x.it, true); left--; shake(x.el, 7); burst(x.R.el, TIERC[x.it.t], 30); window.LR_SFX && LR_SFX.rare(); setTimeout(() => x.R.el.classList.remove("bonus"), 1500); } }
+          if (x.R.render(s, t >= x.R.total ? 0 : v) && now - last > 30) { last = now; arrowTick(v); window.LR_SFX && LR_SFX.tick(); }
+          if (t >= x.R.total) { x.R.land(x.it, true); left--; shake(x.el, 7); arenaRipple(x.R.el, "white", x.el); /* gold spin item landed: white ripple in their reel only */ burst(x.R.el, TIERC[x.it.t], 30); window.LR_SFX && LR_SFX.rare(); setTimeout(() => x.R.el.classList.remove("bonus"), 1500); } }
         if (left > 0) requestAnimationFrame(frame); else done(); })(performance.now()); });
   }
   // what each team scores: total, or only the last case in Terminal
