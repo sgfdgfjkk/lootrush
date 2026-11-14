@@ -1009,7 +1009,7 @@
     w.querySelectorAll(".bw-p b").forEach((el, k) => el.textContent = winners[k].p);
     $("#bvArena").appendChild(w);
     setTimeout(() => countUp($("#bwAmt"), pay, 1400), 450);
-    if (won) confetti();
+    // no confetti on a win (removed)
     if (won) { const host = w; for (let i = 0; i < 34; i++) { const c = document.createElement("span"); c.className = "coin bw-c"; c.style.left = rand(2, 98) + "%"; c.style.setProperty("--s", rand(.6, 1.4)); host.appendChild(c);
         c.animate([{ transform: `translateY(-40px) rotate(0deg) scale(var(--s))`, opacity: 0 }, { opacity: 1, offset: .1 }, { transform: `translateY(${host.clientHeight + 40}px) rotate(${rand(-540, 540)}deg) scale(var(--s))`, opacity: .9 }],
           { duration: rand(1600, 2800), delay: rand(200, 1400), easing: "cubic-bezier(.4,.1,.7,1)", fill: "both" }).onfinish = () => c.remove(); }
@@ -1227,7 +1227,12 @@
     $$("[data-nav]").forEach(a => a.classList.toggle("on", a.dataset.nav === h || (a.dataset.nav === "battles" && (h === "create" || h.startsWith("battle-")))));
     $("#main").scrollTop = 0; if (h === "battles") renderBattles();
     $$(".deal:not(.in)").forEach(el => io.observe(el));
+    // page transition: the new page fades up into place instead of snapping in
+    const v = ["#view-home", "#view-battles", "#view-create", "#view-battle", "#view-blackjack"].map(x => $(x)).find(x => x && !x.hidden);
+    if (v && v !== lastView && !matchMedia("(prefers-reduced-motion: reduce)").matches) v.animate([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], { duration: 280, easing: "cubic-bezier(.2,.8,.2,1)" });
+    lastView = v;
   }
+  let lastView = null;
   document.addEventListener("click", (e) => { const g = e.target.closest("[data-go]"); if (!g) return; e.preventDefault(); dd.classList.remove("open"); location.hash = g.dataset.go; if (!g.dataset.go) route(); });
   addEventListener("hashchange", route);
   route();
@@ -1475,3 +1480,27 @@
   });
 
 })();
+
+// ===== premium touches: styled tooltips + header that lifts when you scroll =====
+(() => {
+  const tip = document.createElement("div"); tip.className = "lr-tip"; tip.hidden = true; document.body.appendChild(tip);
+  let cur = null, timer = 0;
+  const place = (el) => { const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect();
+    let x = r.left + r.width / 2 - t.width / 2, y = r.top - t.height - 8, below = false;
+    if (y < 6) { y = r.bottom + 8; below = true; } x = Math.max(6, Math.min(innerWidth - t.width - 6, x));
+    tip.style.left = x + "px"; tip.style.top = y + "px"; tip.classList.toggle("below", below); };
+  document.addEventListener("mouseover", (e) => {
+    const el = e.target.closest("[title],[data-tip]"); if (el === cur) return; if (!el) return hide();
+    if (el.hasAttribute("title")) { const t = el.getAttribute("title"); if (t) el.dataset.tip = t; el.removeAttribute("title"); }   // use our tooltip, not the browser's
+    const txt = el.dataset.tip; if (!txt) return; cur = el; clearTimeout(timer);
+    timer = setTimeout(() => { if (cur !== el) return; tip.textContent = txt; tip.hidden = false; place(el); tip.classList.remove("in"); void tip.offsetWidth; tip.classList.add("in"); }, 350);
+  });
+  const hide = () => { cur = null; clearTimeout(timer); tip.hidden = true; tip.classList.remove("in"); };
+  document.addEventListener("mousedown", hide, true); addEventListener("scroll", hide, true); addEventListener("blur", hide);
+  // some buttons change their title later (e.g. sound on/off): keep the tooltip text in sync
+  new MutationObserver(ms => ms.forEach(m => { const el = m.target; if (el.getAttribute("title")) { el.dataset.tip = el.getAttribute("title"); el.removeAttribute("title"); if (el === cur) tip.textContent = el.dataset.tip; } }))
+    .observe(document.body, { subtree: true, attributes: true, attributeFilter: ["title"] });
+  const main = document.getElementById("main"), top = document.querySelector(".top");
+  if (main && top) main.addEventListener("scroll", () => top.classList.toggle("scrolled", main.scrollTop > 6), { passive: true });
+})();
+
