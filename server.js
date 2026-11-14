@@ -35,12 +35,15 @@ const CASE_ITEMS = ["pal visor tb lav charm bun kitty horns", "visor lav charm b
 const ODDS = { 9: "50 30 14.5 5 0.5", 10: "55 25 12 5 2 1", 11: "50 30 15 3 1.5 0.5", 12: "60 25 10 3.5 1 0.5", 13: "70 20 7 2.5 0.5", 14: "50 30 12 5 2 0.7 0.25 0.05", 15: "60 35 5", 16: "80 15 4 1" };
 const VOL = 1.35;   // higher = more volatile (cheap items more common, top items rarer)
 const POOLS = CASE_ITEMS.map((s, ci) => { const its = s.split(" ").map(k => V[k]), w = ODDS[ci] ? ODDS[ci].split(" ").map(Number) : its.map(v => Math.pow(v, -VOL)), S = w.reduce((a, c) => a + c, 0); return its.map((v, i) => ({ v, ch: w[i] / S * 100, w: w[i], S })); });
-const PRICE = POOLS.map(p => Math.round(p.reduce((a, x) => a + x.v * x.w / x.S, 0) / .90));   // 10% house edge, same maths as app.js
-const BOTS = ["Babyalien", "Downyluck", "Elonmusk", "Jamal", "Saint", "Speed",];
+// gold spin only uses the case's rare items: under 10% normal chance (at least the top 2). Same rule as app.js
+const goodIdx = (ch) => { const g = ch.map((c, i) => c < 10 ? i : -1).filter(i => i >= 0); return g.length >= 2 ? g : [ch.length - 2, ch.length - 1]; };
+const GOOD = POOLS.map(p => goodIdx(p.map(x => x.ch)));
+const PRICE = POOLS.map((p, k) => { const ev = p.reduce((a, x) => a + x.v * x.w / x.S, 0), g = GOOD[k], bw = g.map((_, j) => Math.pow(.5, j + 1)), BS = bw.reduce((a, x) => a + x, 0);
+  const evB = g.reduce((a, gi, j) => a + p[gi].v * bw[j] / BS, 0); return Math.round((ev * 24 / 25 + evB / 25) / .90); });   // 10% house edge incl. the 1-in-25 gold spin, same maths as app.js
+const BOTS = ["BaconHairBandit", "NoobSlayer9000", "Sir_Lags_Alot", "OofMaster", "RobuxBeggar", "GrandmaGamer", "CertifiedNoob", "Sweaty_Tryhard", "LagWizard", "DadOfTheYear", "BuilderGuy404", "ChunkyMilk", "BruhMoment", "UnpaidIntern", "TouchGrassPls", "TaxEvader3000", "Guest_1337", "WiFiBandit", "SpicyNugget", "ClumsyKnight", "MomSaidNo", "PizzaRat", "SnackGoblin", "TrashPanda", "HappyFlop"];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const rollIdx = (k) => { let x = Math.random() * 100; const p = POOLS[k]; for (let i = 0; i < p.length; i++) { x -= p[i].ch; if (x <= 0) return i; } return 0; };
-const rollBonus = (k) => { const n = POOLS[k].length, h = Math.floor(n / 2), w = []; for (let i = h; i < n; i++) w.push(Math.pow(.5, i - h + 1)); const S = w.reduce((a, c) => a + c, 0);
-  let x = Math.random() * S; for (let i = 0; i < w.length; i++) { x -= w[i]; if (x <= 0) return h + i; } return h; };
+const rollBonus = (k) => { const g = GOOD[k], w = g.map((_, j) => Math.pow(.5, j + 1)), S = w.reduce((a, c) => a + c, 0); let x = Math.random() * S; for (let j = 0; j < g.length; j++) { x -= w[j]; if (x <= 0) return g[j]; } return g[g.length - 1]; };
 const grp = (t) => t.split("v").map(Number), seats = (t) => grp(t).reduce((a, b) => a + b, 0);
 const teamOf = (t, i) => { let s = 0; const g = grp(t); for (let k = 0; k < g.length; k++) { if (i < s + g[k]) return k; s += g[k]; } return 0; };
 const FORMATS = ["1v1", "1v1v1", "1v1v1v1", "2v2", "3v3", "2v2v2"];
@@ -49,6 +52,7 @@ const FORMATS = ["1v1", "1v1v1", "1v1v1v1", "2v2", "3v3", "2v2v2"];
 const clients = new Set();
 const battles = new Map(); let nextId = 1;
 const chatLog = [];
+const RAIN_ON = false;   // rain switched off for now: the timer and pot still show, but nobody can join and nothing is paid
 const rain = { pot: 1500, end: Date.now() + 300000, joined: new Set() };
 
 const send = (ws, o) => { if (ws.readyState === 1) ws.send(JSON.stringify(o)); };
@@ -106,7 +110,7 @@ setInterval(() => { for (const b of battles.values()) if (b.state === "waiting" 
 setInterval(() => {
   if (Math.random() < .35) rain.pot += 5 + Math.floor(Math.random() * 40);
   if (Date.now() < rain.end) return;
-  const js = [...rain.joined].map(userOf).filter(Boolean);
+  const js = RAIN_ON ? [...rain.joined].map(userOf).filter(Boolean) : [];
   if (js.length) { const share = rain.pot / js.length; js.forEach(u => { u.bal += share; pushMe(u, share); }); save(); sysChat(`Rain paid ${(rain.pot / 2).toFixed(2)} to ${js.length} player${js.length > 1 ? "s" : ""}!`); }
   rain.pot = 1000 + Math.floor(Math.random() * 800); rain.end = Date.now() + 300000; rain.joined.clear();
   all({ t: "rain", pot: rain.pot, end: rain.end, joined: false });
@@ -189,7 +193,7 @@ const handlers = {
   },
   bot(ws, m) { const b = battles.get(+m.id); if (b && ws.user === b.owner) fillBot(b, +m.seat); },
   bots(ws, m) { const b = battles.get(+m.id); if (!b || ws.user !== b.owner) return; b.players.forEach((p, i) => { if (!p) setTimeout(() => fillBot(b, i), 350 + i * 380); }); },
-  rain(ws) { if (!ws.user) return send(ws, { t: "err", msg: "Log in to join the rain" }); rain.joined.add(ws.user); send(ws, { t: "rain", pot: rain.pot, end: rain.end, joined: true }); },
+  rain(ws) { if (!RAIN_ON) return; if (!ws.user) return send(ws, { t: "err", msg: "Log in to join the rain" }); rain.joined.add(ws.user); send(ws, { t: "rain", pot: rain.pot, end: rain.end, joined: true }); },
   bj(ws, m, rid) {
     const u = ws.user && userOf(ws.user); if (!u) return send(ws, { t: "res", rid, err: "Log in to play" });
     let g = bjGames.get(u.u);
