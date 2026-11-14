@@ -1565,3 +1565,120 @@ body{background:var(--bg)}
 @keyframes bwRipple{0%{--rr:0px;opacity:1}75%{opacity:.85}100%{--rr:950px;opacity:0}}
 @media (prefers-reduced-motion:reduce){.bw-ripple{display:none}}
 .bv-win::before{opacity:.42!important}
+/* arena ripple on each pull (colour + size set from the pull) */
+.bv-rip{position:absolute;inset:0;pointer-events:none;background-repeat:repeat;background-position:0 0;--rr:0px;opacity:0;
+  -webkit-mask-image:radial-gradient(circle at var(--cx) var(--cy),transparent calc(var(--rr) - 80px),#000 calc(var(--rr) - 18px),#000 var(--rr),transparent calc(var(--rr) + 24px));
+  mask-image:radial-gradient(circle at var(--cx) var(--cy),transparent calc(var(--rr) - 80px),#000 calc(var(--rr) - 18px),#000 var(--rr),transparent calc(var(--rr) + 24px))}
+@media (prefers-reduced-motion:reduce){.bv-rip{display:none}}
+.bv-ar.l{transform-origin:0 50%}.bv-ar.r{transform-origin:100% 50%}
+/* ===== notifications: bell panel (nothing pops up on screen) ===== */
+.toast{display:none!important}
+#bell .dot{min-width:17px;height:17px;width:auto;padding:0 4px;top:-6px;right:-6px;border-radius:9px;display:grid;place-items:center;font:800 10px/1 var(--body);color:#fff;background:var(--bad);box-shadow:0 0 0 2px #1e2126}
+#bell .dot[hidden]{display:none}
+#bell.on{color:#fff;background:#30343b;border-color:#3d8bff}
+#bell.ring [data-i]{animation:bellShake .75s cubic-bezier(.36,.07,.19,.97);transform-origin:50% 8%}
+@keyframes bellShake{0%,100%{transform:rotate(0)}12%{transform:rotate(18deg)}26%{transform:rotate(-15deg)}40%{transform:rotate(11deg)}54%{transform:rotate(-8deg)}68%{transform:rotate(4deg)}82%{transform:rotate(-2deg)}}
+.nf-pop{position:absolute;top:calc(100% + 10px);right:0;z-index:80;width:360px;max-width:calc(100vw - 24px);border-radius:12px;overflow:hidden;
+  background:#1c1f24;border:1px solid #33373f;box-shadow:0 18px 40px -12px rgba(0,0,0,.75),0 0 0 1px rgba(0,0,0,.3);animation:nfIn .16s ease-out}
+.nf-pop[hidden]{display:none}
+@keyframes nfIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.nf-h{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid #2c3037;background:#202328}
+.nf-h>[data-i]{width:18px;height:18px;color:var(--t3);flex:none}
+.nf-h>div{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.nf-h b{font:700 14px/1.1 var(--body);color:#fff}
+.nf-h small{font-size:12px;color:var(--t3)}
+.nf-hb{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;cursor:pointer;color:var(--t3);background:#2a2d33;border:1px solid #363a42;transition:.15s}
+.nf-hb:hover{color:#fff;background:#32363d}
+.nf-hb [data-i]{width:15px;height:15px}
+.nf-list{max-height:380px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#3a3f47 transparent}
+.nf-it{padding:12px 14px;border-bottom:1px solid #282b31;transition:background .15s}
+.nf-it:hover{background:#22252b}
+.nf-it.new{background:#1f2632;box-shadow:inset 3px 0 0 #3d8bff}
+.nf-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:5px}
+.nf-top b{font:800 12px/1.2 var(--body);letter-spacing:.6px;text-transform:uppercase;color:#e9edf5}
+.nf-top small{font-size:11px;color:var(--t4);white-space:nowrap}
+.nf-row{display:flex;align-items:flex-start;gap:10px}
+.nf-row p{flex:1;margin:0;font-size:13px;line-height:1.45;color:var(--t3)}
+.nf-row p b,.nf-row p span:not(.coin){color:#fff;font-weight:700}
+.nf-row p [data-i]{display:none}
+.nf-row .coin.sm{vertical-align:-2px}
+.nf-del{flex:none;width:28px;height:28px;border-radius:7px;display:grid;place-items:center;cursor:pointer;color:var(--t4);background:#26292f;border:1px solid #33373f;transition:.15s}
+.nf-del:hover{color:#ff6b7d;border-color:#5a2d35;background:#2c2226}
+.nf-del [data-i]{width:14px;height:14px}
+.nf-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:34px 16px;color:var(--t4);font-size:13px}
+.nf-empty [data-i]{width:26px;height:26px;opacity:.6}
+.nf-amt{color:#fff;font-weight:800;white-space:nowrap}.nf-amt .coin{margin-right:3px}
+
+/* ===== honeycomb that ripples, instead of moving stripes (bars, live round, jackpot slices) ===== */
+@keyframes hexWave{from{-webkit-mask-position:160% 0;mask-position:160% 0}to{-webkit-mask-position:-60% 0;mask-position:-60% 0}}
+/* jackpot slices: honeycomb in the slice's own colour, a lit wave runs across it */
+.jp-in{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42.00' height='24.25' viewBox='0 0 42.00 24.25'%3E%3Cpath d='M28.00 12.12 L21.00 24.25 L7.00 24.25 L0.00 12.12 L7.00 0.00 L21.00 0.00Z M49.00 0.00 L42.00 12.12 L28.00 12.12 L21.00 0.00 L28.00 -12.12 L42.00 -12.12Z M49.00 24.25 L42.00 36.37 L28.00 36.37 L21.00 24.25 L28.00 12.12 L42.00 12.12Z M7.00 0.00 L0.00 12.12 L-14.00 12.12 L-21.00 0.00 L-14.00 -12.12 L0.00 -12.12Z M7.00 24.25 L0.00 36.37 L-14.00 36.37 L-21.00 24.25 L-14.00 12.12 L0.00 12.12Z' fill='none' stroke='rgba(255,255,255,0.1)' stroke-width='1.4' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0/42.00px 24.25px,linear-gradient(180deg,color-mix(in srgb,var(--c) 18%,#262a31),color-mix(in srgb,var(--c) 42%,#22252b))!important;animation:none!important}
+.jp-in::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42.00' height='24.25' viewBox='0 0 42.00 24.25'%3E%3Cpath d='M28.00 12.12 L21.00 24.25 L7.00 24.25 L0.00 12.12 L7.00 0.00 L21.00 0.00Z M49.00 0.00 L42.00 12.12 L28.00 12.12 L21.00 0.00 L28.00 -12.12 L42.00 -12.12Z M49.00 24.25 L42.00 36.37 L28.00 36.37 L21.00 24.25 L28.00 12.12 L42.00 12.12Z M7.00 0.00 L0.00 12.12 L-14.00 12.12 L-21.00 0.00 L-14.00 -12.12 L0.00 -12.12Z M7.00 24.25 L0.00 36.37 L-14.00 36.37 L-21.00 24.25 L-14.00 12.12 L0.00 12.12Z' fill='none' stroke='rgba(255,255,255,0.55)' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0/42.00px 24.25px;
+  filter:drop-shadow(0 0 4px color-mix(in srgb,var(--c) 80%,#fff));opacity:.8;
+  -webkit-mask-image:linear-gradient(100deg,transparent 30%,#000 46%,#000 54%,transparent 70%);mask-image:linear-gradient(100deg,transparent 30%,#000 46%,#000 54%,transparent 70%);-webkit-mask-size:260% 100%;mask-size:260% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;animation:hexWave 2.4s cubic-bezier(.45,0,.55,1) infinite}
+.jp-in>*{position:relative;z-index:1}
+.jp-ov.done .jp-seg:not(.hit) .jp-in::after{animation:none;opacity:0}
+/* progress bars: small honeycomb fill + ripple (replaces stripes and the shine) */
+.tb-bar i{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18.00' height='10.39' viewBox='0 0 18.00 10.39'%3E%3Cpath d='M12.00 5.20 L9.00 10.39 L3.00 10.39 L0.00 5.20 L3.00 0.00 L9.00 0.00Z M21.00 0.00 L18.00 5.20 L12.00 5.20 L9.00 0.00 L12.00 -5.20 L18.00 -5.20Z M21.00 10.39 L18.00 15.59 L12.00 15.59 L9.00 10.39 L12.00 5.20 L18.00 5.20Z M3.00 0.00 L0.00 5.20 L-6.00 5.20 L-9.00 0.00 L-6.00 -5.20 L0.00 -5.20Z M3.00 10.39 L0.00 15.59 L-6.00 15.59 L-9.00 10.39 L-6.00 5.20 L0.00 5.20Z' fill='none' stroke='rgba(255,255,255,0.14)' stroke-width='1' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0/18.00px 10.39px,linear-gradient(90deg,color-mix(in srgb,var(--c) 30%,#15171b),color-mix(in srgb,var(--c) 85%,#15171b))!important;animation:none!important}
+.tb-bar i::before{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18.00' height='10.39' viewBox='0 0 18.00 10.39'%3E%3Cpath d='M12.00 5.20 L9.00 10.39 L3.00 10.39 L0.00 5.20 L3.00 0.00 L9.00 0.00Z M21.00 0.00 L18.00 5.20 L12.00 5.20 L9.00 0.00 L12.00 -5.20 L18.00 -5.20Z M21.00 10.39 L18.00 15.59 L12.00 15.59 L9.00 10.39 L12.00 5.20 L18.00 5.20Z M3.00 0.00 L0.00 5.20 L-6.00 5.20 L-9.00 0.00 L-6.00 -5.20 L0.00 -5.20Z M3.00 10.39 L0.00 15.59 L-6.00 15.59 L-9.00 10.39 L-6.00 5.20 L0.00 5.20Z' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0/18.00px 10.39px!important;animation:hexWave 2.2s cubic-bezier(.45,0,.55,1) infinite!important;
+  -webkit-mask-image:linear-gradient(100deg,transparent 30%,#000 46%,#000 54%,transparent 70%);mask-image:linear-gradient(100deg,transparent 30%,#000 46%,#000 54%,transparent 70%);-webkit-mask-size:260% 100%;mask-size:260% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;border-radius:inherit}
+/* live round chip in the battle list */
+.br-rd.live{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18.00' height='10.39' viewBox='0 0 18.00 10.39'%3E%3Cpath d='M12.00 5.20 L9.00 10.39 L3.00 10.39 L0.00 5.20 L3.00 0.00 L9.00 0.00Z M21.00 0.00 L18.00 5.20 L12.00 5.20 L9.00 0.00 L12.00 -5.20 L18.00 -5.20Z M21.00 10.39 L18.00 15.59 L12.00 15.59 L9.00 10.39 L12.00 5.20 L18.00 5.20Z M3.00 0.00 L0.00 5.20 L-6.00 5.20 L-9.00 0.00 L-6.00 -5.20 L0.00 -5.20Z M3.00 10.39 L0.00 15.59 L-6.00 15.59 L-9.00 10.39 L-6.00 5.20 L0.00 5.20Z' fill='none' stroke='rgba(255,255,255,0.14)' stroke-width='1' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0/18.00px 10.39px,rgba(61,139,255,.22)!important;animation:none!important}
+.br-rd.live::after{content:"";position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18.00' height='10.39' viewBox='0 0 18.00 10.39'%3E%3Cpath d='M12.00 5.20 L9.00 10.39 L3.00 10.39 L0.00 5.20 L3.00 0.00 L9.00 0.00Z M21.00 0.00 L18.00 5.20 L12.00 5.20 L9.00 0.00 L12.00 -5.20 L18.00 -5.20Z M21.00 10.39 L18.00 15.59 L12.00 15.59 L9.00 10.39 L12.00 5.20 L18.00 5.20Z M3.00 0.00 L0.00 5.20 L-6.00 5.20 L-9.00 0.00 L-6.00 -5.20 L0.00 -5.20Z M3.00 10.39 L0.00 15.59 L-6.00 15.59 L-9.00 10.39 L-6.00 5.20 L0.00 5.20Z' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0/18.00px 10.39px;
+  -webkit-mask-image:linear-gradient(100deg,transparent 30%,#000 46%,#000 54%,transparent 70%);mask-image:linear-gradient(100deg,transparent 30%,#000 46%,#000 54%,transparent 70%);-webkit-mask-size:260% 100%;mask-size:260% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;animation:hexWave 1.8s cubic-bezier(.45,0,.55,1) infinite}
+@media (prefers-reduced-motion:reduce){.jp-in::after,.tb-bar i::before,.br-rd.live::after{animation:none}}
+.jp-in::after{opacity:.55}
+/* team boxes: no glowing outline all the way round, just a solid team-colour line along the top */
+.tb{border:1px solid #2c3037!important;box-shadow:0 3px 0 #191b1f!important;background:#202328!important}
+.tb::before{height:3px!important;background:var(--c)!important;opacity:1!important;border-radius:11px 11px 0 0}
+.tb.won{border-color:#2c3037!important;box-shadow:0 3px 0 #191b1f!important;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 10%,#202328),#202328 60%)!important}
+.tb.won::before{height:4px!important}
+/* team boxes: the top line wraps a little way down the sides and fades out, so it blends in */
+.tb::before{inset:0!important;height:auto!important;background:none!important;border-radius:inherit!important;pointer-events:none;
+  border:1.5px solid var(--c);border-top-width:3px;
+  -webkit-mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.55) 22%,transparent 55%);mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.55) 22%,transparent 55%)}
+.tb.won::before{border-top-width:4px!important}
+/* results screen: no ripple */
+.bw-ripple{display:none!important}
+/* pull history cards: rarity colour tints the top half and fades out, no outlines, no gold spin badge */
+.hc,.hc.is-mvp{border:1px solid #2c3037!important;background:#202328!important}
+.hc>*{z-index:1}
+.hc::after,.hc.bon::after{content:""!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;left:0!important;right:0!important;top:0!important;bottom:0!important;margin:0!important;z-index:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 16%,transparent),transparent 55%)!important;filter:none!important;
+  border:1.5px solid var(--tc);border-top-width:2.5px;
+  -webkit-mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 25%,transparent 55%);mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 25%,transparent 55%)}
+.hc.q::after{display:none!important}
+/* "4 of 6" round hexagon: same look, blue on the top half fading into grey */
+.hx{background:linear-gradient(180deg,#3d8bff 0%,#3a5a8c 22%,#3a3f48 50%,#2a2d33 100%)!important}
+.hx::before{background:linear-gradient(180deg,#22304a 0%,#23262c 55%)!important}
+
+/* battle list rows: no line on the left; status colour runs along the top and fades halfway down the sides */
+.br{--bc:#e6e9ef}.br.is-live{--bc:#3d8bff}.br.is-done{--bc:#4a505a}
+.br.is-mine{box-shadow:0 3px 0 #191b1f,inset 0 1px 0 rgba(255,255,255,.035)!important;border-color:var(--line)}
+.br::before,.br.is-live::before,.br:not(.is-live):not(.is-done)::before,.br.is-done::before{left:0!important;right:0!important;top:0!important;bottom:0!important;width:auto!important;height:auto!important;
+  border-radius:inherit!important;box-shadow:none!important;animation:none!important;pointer-events:none;z-index:0;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bc) 9%,transparent),transparent 50%)!important;border:1.5px solid var(--bc);border-top-width:2.5px;
+  -webkit-mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 22%,transparent 50%);mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 22%,transparent 50%)}
+.br>*{position:relative;z-index:1}
+/* case strip: still honeycomb behind the cases (no ripple / sweep) */
+.br-cases{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36.00' height='20.78' viewBox='0 0 36.00 20.78'%3E%3Cpath d='M24.00 10.39 L18.00 20.78 L6.00 20.78 L0.00 10.39 L6.00 0.00 L18.00 0.00Z M42.00 0.00 L36.00 10.39 L24.00 10.39 L18.00 0.00 L24.00 -10.39 L36.00 -10.39Z M42.00 20.78 L36.00 31.18 L24.00 31.18 L18.00 20.78 L24.00 10.39 L36.00 10.39Z M6.00 0.00 L0.00 10.39 L-12.00 10.39 L-18.00 0.00 L-12.00 -10.39 L0.00 -10.39Z M6.00 20.78 L0.00 31.18 L-12.00 31.18 L-18.00 20.78 L-12.00 10.39 L0.00 10.39Z' fill='none' stroke='%232c3038' stroke-width='1.1'/%3E%3C/svg%3E") 0 0/36.00px 20.78px,radial-gradient(120% 140% at 50% 100%,#23262c,#1a1c20)!important}
+.br.is-live .br-cases::after{display:none!important}
+
+/* battle list: no half-way edge lines, no outline on the current case */
+.br::before,.br.is-live::before,.br:not(.is-live):not(.is-done)::before,.br.is-done::before{display:none!important}
+.bc.cur{box-shadow:none!important}
+/* hover a battle: a light wave ripples through the case-strip honeycomb */
+.br .br-cases::after,.br.is-live .br-cases::after{content:""!important;display:block!important;position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;animation:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36.00' height='20.78' viewBox='0 0 36.00 20.78'%3E%3Cpath d='M24.00 10.39 L18.00 20.78 L6.00 20.78 L0.00 10.39 L6.00 0.00 L18.00 0.00Z M42.00 0.00 L36.00 10.39 L24.00 10.39 L18.00 0.00 L24.00 -10.39 L36.00 -10.39Z M42.00 20.78 L36.00 31.18 L24.00 31.18 L18.00 20.78 L24.00 10.39 L36.00 10.39Z M6.00 0.00 L0.00 10.39 L-12.00 10.39 L-18.00 0.00 L-12.00 -10.39 L0.00 -10.39Z M6.00 20.78 L0.00 31.18 L-12.00 31.18 L-18.00 20.78 L-12.00 10.39 L0.00 10.39Z' fill='none' stroke='%236fb0ff' stroke-width='1.4'/%3E%3C/svg%3E") 0 0/36.00px 20.78px!important;opacity:0;filter:drop-shadow(0 0 4px rgba(77,155,255,.6));
+  -webkit-mask-image:linear-gradient(100deg,transparent 30%,#000 46%,#000 54%,transparent 70%);mask-image:linear-gradient(100deg,transparent 30%,#000 46%,#000 54%,transparent 70%);-webkit-mask-size:260% 100%;mask-size:260% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:160% 0;mask-position:160% 0}
+.br:hover .br-cases::after,.br.is-live:hover .br-cases::after{opacity:.7;animation:hexWave 1.6s cubic-bezier(.45,0,.55,1) infinite!important}
+.br-cases>*{position:relative;z-index:1}
+.br:hover .br-cases::after,.br.is-live:hover .br-cases::after{opacity:.95;animation:hexWave 2.2s linear infinite!important;
+  -webkit-mask-image:linear-gradient(100deg,transparent 20%,#000 42%,#000 58%,transparent 80%);mask-image:linear-gradient(100deg,transparent 20%,#000 42%,#000 58%,transparent 80%)}
+/* rain box: blue line along the top that fades halfway down the sides */
+.rain{border-color:#2c3037!important}
+.rain::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(180deg,rgba(61,139,255,.12),transparent 50%);border:1.5px solid #3d8bff;border-top-width:2.5px;
+  -webkit-mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 22%,transparent 50%);mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.5) 22%,transparent 50%)}
+/* pull history cards: no half-way lines, keep only the soft rarity tint */
+.hc::after,.hc.bon::after{border:0!important;-webkit-mask-image:none!important;mask-image:none!important}
